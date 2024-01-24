@@ -290,7 +290,8 @@ h6 {
 
 .project1 {
     background: url(Encryptomed.png) no-repeat 50% 50%;
-    background-size: cover;
+    background-size: 500px;
+    
 }
 
 .project1::after {
@@ -300,19 +301,19 @@ h6 {
     position: relative;
     color: #fff;
     display: block;
-    top: 8%;
-    left: -60%;
+    top: 80%;
+    left: -44%;
     right: 0;
     bottom: 0;
 }
 
 .project2 {
-    background: url(https://images.unsplash.com/photo-1519289312798-1c1ae8cae4e9?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80) no-repeat 50% 50%;
+    background: url(mp.png) no-repeat 50% 50%;
     background-size: cover;
 }
 
 .project2::after {
-    content: "Endless.";
+    content: "MedicFood.";
     font-family: "Roboto Mono";
     font-size: 36px;
     position: relative;
@@ -325,37 +326,37 @@ h6 {
 }
 
 .project3 {
-    background: url(https://images.unsplash.com/photo-1496307653780-42ee777d4833?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80) no-repeat 50% 50%;
+    background: url(3tt.jpeg);
     background-size: cover;
 }
 
 .project3::after {
-    content: "Unstoppable.";
+    content: "Serverless Three-Tier Architecture For MERN Stack.";
     font-family: "Roboto Mono";
     font-size: 36px;
     position: relative;
     color: #fff;
     display: block;
     top: 80%;
-    left: -50%;
+    left: -100%;
     right: 0;
     bottom: 0;
 }
 
 .project4 {
-    background: url(https://images.unsplash.com/photo-1527576539890-dfa815648363?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=401&q=80) no-repeat 50% 50%;
+    background: url(block.jpg) no-repeat 50% 50%;
     background-size: cover;
 }
 
 .project4::after {
-    content: "Departure.";
+    content: "Blockchain based serverless To-Do list.";
     font-family: "Roboto Mono";
     font-size: 36px;
     position: relative;
     color: #fff;
     display: block;
     top: 10%;
-    left: 90%;
+    left: 110%;
     right: 0;
     bottom: 0;
 }
@@ -509,6 +510,20 @@ h6 {
     background: url(encrypto.png) no-repeat;
     background-size: cover;
 }
+
+.image2 {
+    background: url(mp.png) no-repeat;
+    background-size: contain;
+}
+.image3 {
+    background: url(3tt.jpeg) no-repeat;
+    background-size: cover;
+}
+.image4 {
+    background: url(block.jpg) no-repeat;
+    background-size: cover;
+}
+
 
 #contact-form {
     margin: 5% 1.4%;
