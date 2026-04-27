@@ -165,7 +165,7 @@ function Chapter({ project, isLast }: ChapterProps) {
               onClick={(e) => {
                 if (project.cta?.placeholder) {
                   e.preventDefault();
-                  showCtaToast('Demo video coming soon — bookmark this page.');
+                  alert('Demo video coming soon — bookmark this page.');
                 }
               }}
             >
