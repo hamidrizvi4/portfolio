@@ -297,10 +297,10 @@ export default function HeroSection() {
           position: relative;
           min-height: 100vh;
           min-height: 100svh; /* Safari mobile address bar */
-          padding: 6rem var(--gutter) 3rem;
-          display: grid;
-          grid-template-rows: auto 1fr auto;
-          gap: 2rem;
+          padding: 3rem var(--gutter) 2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
           overflow: hidden;
         }
 
@@ -338,9 +338,7 @@ export default function HeroSection() {
 
         /* ──────────── PULL QUOTE ──────────── */
         .hero__quote {
-          position: absolute;
-          top: 6rem;
-          right: var(--gutter);
+          align-self: flex-end;
           max-width: 22ch;
           font-family: var(--font-display);
           font-size: clamp(0.95rem, 1.1vw, 1.15rem);
@@ -349,13 +347,10 @@ export default function HeroSection() {
           color: var(--pulp);
           text-align: right;
           opacity: 0.85;
-          z-index: 2;
         }
 
         @media (max-width: 900px) {
           .hero {
-            display: flex;
-            flex-direction: column;
             gap: 1.5rem;
             min-height: auto;
           }
@@ -364,22 +359,19 @@ export default function HeroSection() {
             margin: 1rem 0;
           }
           .hero__quote {
-            position: static !important;
-            top: auto !important;
-            right: auto !important;
-            left: auto !important;
-            max-width: 100% !important;
-            text-align: left !important;
-            margin: 0 !important;
+            align-self: flex-start;
+            max-width: 100%;
+            text-align: left;
             opacity: 0.7;
-            z-index: auto !important;
-            display: block;
           }
         }
 
         /* ──────────── DISPLAY ──────────── */
         .hero__display {
-          align-self: center;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
           margin: 0;
           color: var(--paper);
         }
