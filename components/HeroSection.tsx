@@ -355,7 +355,9 @@ export default function HeroSection() {
 
         @media (max-width: 900px) {
           .hero {
-            min-height: auto;
+            min-height: 100vh;
+            min-height: 100svh;
+            justify-content: space-between;
           }
           .hero__quote {
             text-align: left;
@@ -543,6 +545,10 @@ export default function HeroSection() {
         @media (max-width: 640px) {
           .hero {
             padding: 3.5rem 1.75rem 1.5rem;
+          }
+          .hero__display {
+            flex: 0 0 auto;
+            padding-bottom: 0;
           }
           .display-xl {
             font-size: clamp(2.5rem, 11vw, 4.5rem);
