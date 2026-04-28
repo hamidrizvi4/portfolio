@@ -310,15 +310,6 @@ export default function ContactSection() {
       <footer className="colophon">
         <div className="colophon__row">
           <div className="colophon__col">
-            <p className="eyebrow colophon__label">Set in</p>
-            <p className="colophon__value">
-              <span style={{ fontFamily: 'var(--font-display)' }}>Fraunces</span> ·{' '}
-              <span style={{ fontFamily: 'var(--font-sans)' }}>Inter</span> ·{' '}
-              <span style={{ fontFamily: 'var(--font-mono)' }}>JetBrains Mono</span>
-            </p>
-          </div>
-
-          <div className="colophon__col">
             <p className="eyebrow colophon__label">Made by</p>
             <p className="colophon__value">
               Hamid Rizvi · NYC · {new Date().getFullYear()}
@@ -419,7 +410,7 @@ export default function ContactSection() {
         .colophon__row {
           max-width: var(--max-w);
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          grid-template-columns: 1fr;
           gap: 2rem;
           padding-bottom: 2.5rem;
           border-bottom: 1px solid var(--rule);
