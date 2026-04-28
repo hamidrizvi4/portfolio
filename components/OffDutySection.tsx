@@ -95,6 +95,7 @@ function useCountUp(target: number, duration = 1400, isActive = false) {
 function PhotoCarousel() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   // Drag-to-scroll (desktop)
   useEffect(() => {
@@ -167,6 +168,53 @@ function PhotoCarousel() {
     }
   }, []);
 
+  // ============ LIGHTBOX HANDLERS ============
+  const openLightbox = useCallback((idx: number) => {
+    const photo = PHOTOS[idx];
+    if (!photo?.src) return; // Don't open for placeholders
+    setLightboxIdx(idx);
+  }, []);
+
+  const closeLightbox = useCallback(() => {
+    setLightboxIdx(null);
+  }, []);
+
+  const lightboxPrev = useCallback(() => {
+    setLightboxIdx((prev) => {
+      if (prev === null) return null;
+      // Find previous photo with a real image
+      let next = prev - 1;
+      while (next >= 0 && !PHOTOS[next].src) next--;
+      return next >= 0 ? next : prev;
+    });
+  }, []);
+
+  const lightboxNext = useCallback(() => {
+    setLightboxIdx((prev) => {
+      if (prev === null) return null;
+      // Find next photo with a real image
+      let next = prev + 1;
+      while (next < PHOTOS.length && !PHOTOS[next].src) next++;
+      return next < PHOTOS.length ? next : prev;
+    });
+  }, []);
+
+  // Keyboard navigation + body scroll lock
+  useEffect(() => {
+    if (lightboxIdx === null) return;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') lightboxPrev();
+      if (e.key === 'ArrowRight') lightboxNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [lightboxIdx, closeLightbox, lightboxPrev, lightboxNext]);
+
   return (
     <div className="photos">
       <header className="photos__header">
@@ -186,7 +234,13 @@ function PhotoCarousel() {
 
       <div className="photos__carousel" ref={carouselRef}>
         {PHOTOS.map((photo, idx) => (
-          <article key={photo.id} className="photo-card" data-idx={idx}>
+          <article
+            key={photo.id}
+            className="photo-card"
+            data-idx={idx}
+            onClick={() => openLightbox(idx)}
+            style={{ cursor: photo.src ? 'pointer' : 'grab' }}
+          >
             <div className="photo-card__frame">
               {photo.src ? (
                 <img src={photo.src} alt={photo.alt} loading="lazy" />
@@ -218,6 +272,54 @@ function PhotoCarousel() {
           />
         ))}
       </div>
+
+      {/* LIGHTBOX */}
+      {lightboxIdx !== null && PHOTOS[lightboxIdx]?.src && (
+        <div
+          className="lightbox"
+          onClick={closeLightbox}
+          role="dialog"
+          aria-label="Photo lightbox"
+        >
+          <button
+            className="lightbox__close"
+            onClick={closeLightbox}
+            aria-label="Close lightbox"
+          >
+            ✕
+          </button>
+
+          <button
+            className="lightbox__nav lightbox__nav--prev"
+            onClick={(e) => { e.stopPropagation(); lightboxPrev(); }}
+            aria-label="Previous photo"
+          >
+            ←
+          </button>
+
+          <div className="lightbox__content" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={PHOTOS[lightboxIdx].src!}
+              alt={PHOTOS[lightboxIdx].alt}
+              className="lightbox__img"
+            />
+            <div className="lightbox__caption">
+              <p className="lightbox__caption-text">{PHOTOS[lightboxIdx].caption}</p>
+              {PHOTOS[lightboxIdx].location && (
+                <p className="eyebrow lightbox__caption-location">{PHOTOS[lightboxIdx].location}</p>
+              )}
+            </div>
+          </div>
+
+          <button
+            className="lightbox__nav lightbox__nav--next"
+            onClick={(e) => { e.stopPropagation(); lightboxNext(); }}
+            aria-label="Next photo"
+          >
+            →
+          </button>
+        </div>
+      )}
 
       <style jsx>{`
         .photos {
@@ -409,6 +511,138 @@ function PhotoCarousel() {
           }
           .photo-card:hover .photo-card__frame {
             transform: none;
+          }
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: rgba(10, 10, 8, 0.95);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1.5rem;
+          padding: 2rem;
+          animation: lightbox-fade-in 250ms ease-out;
+        }
+
+        @keyframes lightbox-fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .lightbox__close {
+          position: absolute;
+          top: 1.5rem;
+          right: 1.5rem;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 1px solid var(--rule-strong);
+          background: rgba(10, 10, 8, 0.6);
+          color: var(--paper);
+          font-size: 1.1rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: border-color 200ms ease, color 200ms ease, background 200ms ease;
+          z-index: 10;
+        }
+        .lightbox__close:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+          background: rgba(255, 74, 28, 0.08);
+        }
+
+        .lightbox__nav {
+          flex-shrink: 0;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          border: 1px solid var(--rule-strong);
+          background: rgba(10, 10, 8, 0.6);
+          color: var(--paper);
+          font-family: var(--font-mono);
+          font-size: 1.25rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: border-color 200ms ease, color 200ms ease, background 200ms ease, transform 200ms ease;
+        }
+        .lightbox__nav:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+          background: rgba(255, 74, 28, 0.08);
+          transform: scale(1.08);
+        }
+
+        .lightbox__content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1.25rem;
+          max-width: 80vw;
+          max-height: 85vh;
+          animation: lightbox-scale-in 300ms ease-out;
+        }
+
+        @keyframes lightbox-scale-in {
+          from { opacity: 0; transform: scale(0.92); }
+          to { opacity: 1; transform: scale(1); }
+        }
+
+        .lightbox__img {
+          max-width: 100%;
+          max-height: 75vh;
+          object-fit: contain;
+          border-radius: 4px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .lightbox__caption {
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          gap: 0.3rem;
+        }
+        .lightbox__caption-text {
+          font-family: var(--font-display);
+          font-style: italic;
+          font-size: 1rem;
+          color: var(--paper);
+          margin: 0;
+        }
+        .lightbox__caption-location {
+          color: var(--pulp);
+          font-size: 0.65rem;
+        }
+
+        @media (max-width: 640px) {
+          .lightbox {
+            padding: 1rem;
+            gap: 0.75rem;
+          }
+          .lightbox__nav {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem;
+          }
+          .lightbox__close {
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
+            top: 1rem;
+            right: 1rem;
+          }
+          .lightbox__content {
+            max-width: 90vw;
+          }
+          .lightbox__img {
+            max-height: 65vh;
           }
         }
       `}</style>

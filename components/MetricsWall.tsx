@@ -1,28 +1,45 @@
 'use client';
 
 /**
- * MetricsWall.tsx — v2 (snap-scroll)
+ * MetricsWall.tsx
  *
- * Section 02 — Six full-viewport slides, vertical scroll-snap.
+ * Section 02 — Headline metrics, presented as scrollytelling.
  *
- * Architecture (changed from v1):
- * - Container has scroll-snap-type: y mandatory.
- * - Each metric is a 100vh slide with scroll-snap-align: start.
- * - scroll-snap-stop: always — can't blow past a slide on a fast scroll.
- * - IntersectionObserver triggers count-up when slide is ≥50% visible.
- * - Sticky masthead floats above slides — counter updates per active slide.
- * - Progress rule fills based on which slide is active (1/6 → 6/6).
+ * Architecture: Sticky-pin scroll progression.
+ * - Outer wrapper is 350vh tall: 50vh entry buffer + 300vh of slide-progression
+ *   (6 slides × 50vh each).
+ * - Each slide gets ~50vh of scroll, which matches one typical trackpad/wheel
+ *   swipe distance. This means one swipe = one slide advance, instead of
+ *   multiple swipes per slide.
+ * - Inner viewport is `position: sticky; top: 0; height: 100vh` — stays pinned
+ *   to the viewport while the outer scrolls past.
+ * - All 6 slides stack at `inset: 0` inside the pinned viewport. Active slide
+ *   has opacity: 1 and translateY(0); siblings fade out.
+ * - Scroll progress (0 → 1) is computed from the wrapper's bounding rect:
+ *     progress = -wrapperTop / (wrapperHeight - viewportHeight)
+ *   Slide index = floor(slideProgress * 6) — clamped to [0, 5].
+ * - Progress bar (the orange line) tracks progress smoothly, not discretely.
+ * - The 100vh entry buffer means the user "glides to the orange line" before
+ *   the section pins. This keeps the transition from feeling abrupt.
  *
- * Motion principles applied (Emil's framework):
- * - Snap behavior is native browser CSS — best possible perf, smooth on mobile.
- * - Count-up uses ease-out cubic, 1400ms — same curve as Hero decrypt.
- * - Slide content uses opacity + transform for hardware acceleration.
- * - prefers-reduced-motion: removes count-up + transitions, keeps snap.
+ * Why sticky-pin instead of scroll-hijack:
+ * - Native scroll behavior preserved (trackpad momentum, scrollbar drag, PgDn).
+ * - Mobile swipe works without intervention.
+ * - Browser back/forward + URL hashes don't break.
+ * - Accessibility: keyboard navigation and screen readers behave correctly.
+ *
+ * Motion principles:
+ * - Crossfade between slides: 300ms ease-out, just opacity + 12px translateY.
+ * - Count-up runs once per slide on activation, 1400ms ease-out cubic.
+ * - prefers-reduced-motion: numbers appear instantly, no translation.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { metrics } from '@/lib/personal-data';
 
+// ============================================
+// HOW LINES — short editorial subhead per metric
+// ============================================
 const HOW_LINES = [
   'Hybrid AI configured 80+ metadata fields in a single prompt.',
   'Caching strategy + intelligent fallback turned every retry into a hit.',
@@ -32,83 +49,82 @@ const HOW_LINES = [
   'Pandas + Gemini collapsed a 4-hour Excel ritual into a 5-minute dashboard.',
 ];
 
+// ============================================
+// VALUE FORMATTER
+// ============================================
 function formatValue(current: number, target: number): string {
   if (target < 1) return current.toFixed(2);
   if (target % 1 !== 0) return current.toFixed(1);
   return Math.round(current).toString();
 }
 
-interface MetricSlideProps {
-  metric: typeof metrics[number];
-  howLine: string;
-  index: number;
-  total: number;
-  onActivate: (idx: number) => void;
-  direction: 'left' | 'right';
-  rootRef: React.RefObject<HTMLDivElement>;
-}
-
-function MetricSlide({ metric, howLine, index, total, onActivate, direction, rootRef }: MetricSlideProps) {
-  const slideRef = useRef<HTMLElement>(null);
-  const [isActive, setIsActive] = useState(false);
-  const [displayValue, setDisplayValue] = useState('0');
-  const animationFrameRef = useRef<number>();
+// ============================================
+// COUNT-UP HOOK
+// Drives the digit animation when slide becomes active.
+// ============================================
+function useCountUp(target: number, isActive: boolean): string {
+  const [value, setValue] = useState('0');
+  const frameRef = useRef<number>();
 
   useEffect(() => {
-    const slide = slideRef.current;
-    if (!slide) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const active = entry.isIntersecting && entry.intersectionRatio >= 0.5;
-        setIsActive(active);
-        if (active) onActivate(index);
-      },
-      {
-        root: rootRef.current,
-        threshold: [0, 0.5, 1],
-      }
-    );
-    observer.observe(slide);
-    return () => observer.disconnect();
-  }, [index, onActivate, rootRef]);
-
-  useEffect(() => {
-    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    if (frameRef.current) cancelAnimationFrame(frameRef.current);
 
     if (!isActive) {
-      setDisplayValue('0');
+      // Don't reset to 0 — keep the last value so slide doesn't visually flicker
+      // during the fade-out transition. Re-running count-up on re-activation
+      // is handled by the next branch.
       return;
     }
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
-      setDisplayValue(formatValue(metric.value, metric.value));
+      setValue(formatValue(target, target));
       return;
     }
 
+    // Reset to 0 then count up. Done here (only when becoming active) instead
+    // of on deactivation, to avoid wasted renders during fade-out.
+    setValue('0');
+
     const start = performance.now();
-    const duration = 1400;
+    const duration = 700;
 
     const tick = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayValue(formatValue(metric.value * eased, metric.value));
-      if (progress < 1) animationFrameRef.current = requestAnimationFrame(tick);
+      setValue(formatValue(target * eased, target));
+      if (progress < 1) frameRef.current = requestAnimationFrame(tick);
     };
-    animationFrameRef.current = requestAnimationFrame(tick);
+    frameRef.current = requestAnimationFrame(tick);
 
     return () => {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, [isActive, metric.value]);
+  }, [isActive, target]);
+
+  return value;
+}
+
+// ============================================
+// METRIC SLIDE
+// One slide. Stacked absolutely; visibility driven by `isActive` prop.
+// ============================================
+interface MetricSlideProps {
+  metric: typeof metrics[number];
+  howLine: string;
+  index: number;
+  total: number;
+  isActive: boolean;
+}
+
+function MetricSlide({ metric, howLine, index, total, isActive }: MetricSlideProps) {
+  const displayValue = useCountUp(metric.value, isActive);
 
   return (
     <article
-      ref={slideRef}
       className={`metric-slide ${isActive ? 'is-active' : ''}`}
-      data-direction={direction}
+      aria-hidden={!isActive}
       aria-label={`${metric.label}: ${('prefix' in metric && metric.prefix) || ''}${metric.value}${metric.suffix}`}
     >
       <div className="metric-slide__inner">
@@ -133,14 +149,21 @@ function MetricSlide({ metric, howLine, index, total, onActivate, direction, roo
 
       <style jsx>{`
         .metric-slide {
-          height: 100%;
-          scroll-snap-align: start;
-          scroll-snap-stop: always;
+          position: absolute;
+          inset: 0;
           display: flex;
           align-items: center;
           justify-content: flex-start;
           padding: 6rem var(--gutter) 6rem;
-          position: relative;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .metric-slide.is-active {
+          opacity: 1;
+          pointer-events: auto;
+          transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .metric-slide__inner {
@@ -148,17 +171,13 @@ function MetricSlide({ metric, howLine, index, total, onActivate, direction, roo
           max-width: var(--max-w);
           display: grid;
           gap: 1.5rem;
-          opacity: 0;
-          transform: translateX(${direction === 'left' ? '-32px' : '32px'});
-          transition:
-            opacity 420ms var(--ease-out),
-            transform 420ms var(--ease-out);
-          will-change: opacity, transform;
+          transform: translateY(6px);
+          transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+          will-change: transform;
         }
 
         .metric-slide.is-active .metric-slide__inner {
-          opacity: 1;
-          transform: translateX(0);
+          transform: translateY(0);
         }
 
         .metric-slide__index {
@@ -220,9 +239,10 @@ function MetricSlide({ metric, howLine, index, total, onActivate, direction, roo
         }
 
         @media (prefers-reduced-motion: reduce) {
+          .metric-slide,
           .metric-slide__inner {
-            transform: none;
             transition: opacity 200ms linear;
+            transform: none !important;
           }
         }
       `}</style>
@@ -230,101 +250,147 @@ function MetricSlide({ metric, howLine, index, total, onActivate, direction, roo
   );
 }
 
+// ============================================
+// METRICS WALL — sticky-pin orchestrator
+// ============================================
 export default function MetricsWall() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const trackRef = useRef<HTMLDivElement>(null);
 
-  const handleActivate = useCallback((idx: number) => {
-    setActiveIndex(idx);
-  }, []);
-
-  // ============ SCROLL CHAINING ============
-  // Release scroll to the page when the user reaches the top or bottom of the section.
-  // Without this, the inner snap-scroll container traps the wheel events
-  // and the user can't progress to the next section by scrolling.
+  // ============ SCROLL PROGRESS TRACKING ============
+  // Computes which slide should be active based on the outer wrapper's
+  // position relative to the viewport. Throttled with requestAnimationFrame
+  // for 60fps smoothness.
+  //
+  // Performance note: progress (orange line) updates the DOM directly via
+  // ref — never through React state. This avoids re-rendering all 6 slides
+  // on every scroll tick, which was causing visible lag.
   useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
 
-    const releaseScrollIfAtEdge = (deltaY: number): boolean => {
-      const atTop = track.scrollTop <= 1;
-      const atBottom = track.scrollTop + track.clientHeight >= track.scrollHeight - 1;
-      if (deltaY > 0 && atBottom) {
-        window.scrollBy({ top: deltaY, behavior: 'auto' });
-        return true;
-      }
-      if (deltaY < 0 && atTop) {
-        window.scrollBy({ top: deltaY, behavior: 'auto' });
-        return true;
-      }
-      return false;
+    let frame = 0;
+    let lastIndex = -1;
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const rect = wrapper.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const scrollableDistance = wrapper.offsetHeight - viewportHeight;
+
+        if (scrollableDistance <= 0) {
+          setActiveIndex(0);
+          if (progressBarRef.current) {
+            progressBarRef.current.style.transform = 'scaleX(0)';
+          }
+          return;
+        }
+
+        // -rect.top is how far we've scrolled into the wrapper.
+        // Clamp to [0, scrollableDistance].
+        const scrolled = Math.max(0, Math.min(-rect.top, scrollableDistance));
+        const rawProgress = scrolled / scrollableDistance;
+
+        // ENTRY BUFFER: First 1/7 of the wrapper is "glide to the orange line"
+        // — slide 1 stays put through this. Slide progression starts only
+        // after the buffer is consumed. On a 350vh wrapper, that's 50vh of
+        // entry glide before pinning takes effect for slide changes.
+        const ENTRY_BUFFER_RATIO = 1 / 7;
+        const slideProgress =
+          rawProgress < ENTRY_BUFFER_RATIO
+            ? 0
+            : Math.min(1, (rawProgress - ENTRY_BUFFER_RATIO) / (1 - ENTRY_BUFFER_RATIO));
+
+        // Update orange progress line directly (no React re-render)
+        if (progressBarRef.current) {
+          progressBarRef.current.style.transform = `scaleX(${slideProgress})`;
+        }
+
+        // SLIDE THRESHOLDS — unequal buckets so slides 1 & 2 advance faster.
+        // Each entry is the slideProgress value at which that slide starts.
+        // Slides 1 & 2: 8% each (~48vh of scroll on a 600vh progression zone).
+        // Slides 3–6: ~21% each (~126vh) — comfortable pacing for the meatier metrics.
+        const THRESHOLDS = [0, 0.08, 0.16, 0.37, 0.58, 0.79];
+        let idx = 0;
+        for (let i = THRESHOLDS.length - 1; i >= 0; i--) {
+          if (slideProgress >= THRESHOLDS[i]) {
+            idx = i;
+            break;
+          }
+        }
+
+        if (idx !== lastIndex) {
+          lastIndex = idx;
+          setActiveIndex(idx);
+        }
+      });
     };
 
-    const onWheel = (e: WheelEvent) => {
-      if (releaseScrollIfAtEdge(e.deltaY)) {
-        e.preventDefault();
-      }
-    };
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      const atBottom = track.scrollTop + track.clientHeight >= track.scrollHeight - 1;
-      const atTop = track.scrollTop <= 1;
-      if ((e.key === 'ArrowDown' || e.key === 'PageDown') && atBottom) {
-        track.blur();
-        window.scrollBy({ top: window.innerHeight * 0.5 });
-      }
-      if ((e.key === 'ArrowUp' || e.key === 'PageUp') && atTop) {
-        track.blur();
-        window.scrollBy({ top: -window.innerHeight * 0.5 });
-      }
-    };
-
-    track.addEventListener('wheel', onWheel, { passive: false });
-    track.addEventListener('keydown', onKeyDown);
+    onScroll(); // Initial computation on mount
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
     return () => {
-      track.removeEventListener('wheel', onWheel);
-      track.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (frame) cancelAnimationFrame(frame);
     };
   }, []);
 
   return (
-    <section className="metrics" aria-label="Headline metrics">
-      <header className="metrics__masthead">
-        <span className="eyebrow">02 / 06 — Metrics</span>
-        <span className="eyebrow metrics__counter">
-          {String(activeIndex + 1).padStart(2, '0')} / {String(metrics.length).padStart(2, '0')}
-        </span>
-      </header>
+    <div className="metrics-scroll-zone" ref={wrapperRef}>
+      <section className="metrics-pinned" aria-label="Headline metrics">
+        <header className="metrics__masthead">
+          <span className="eyebrow">02 / 06 — Metrics</span>
+          <span className="eyebrow metrics__counter">
+            {String(activeIndex + 1).padStart(2, '0')} / {String(metrics.length).padStart(2, '0')}
+          </span>
+        </header>
 
-      <div className="metrics__track" ref={trackRef}>
-        {metrics.map((metric, idx) => (
-          <MetricSlide
-            key={metric.label}
-            metric={metric}
-            howLine={HOW_LINES[idx]}
-            index={idx}
-            total={metrics.length}
-            onActivate={handleActivate}
-            direction={idx % 2 === 0 ? 'left' : 'right'}
-            rootRef={trackRef}
+        <div className="metrics__stage">
+          {metrics.map((metric, idx) => (
+            <MetricSlide
+              key={metric.label}
+              metric={metric}
+              howLine={HOW_LINES[idx]}
+              index={idx}
+              total={metrics.length}
+              isActive={idx === activeIndex}
+            />
+          ))}
+        </div>
+
+        <footer className="metrics__progress-rule">
+          <span
+            ref={progressBarRef}
+            className="metrics__progress-fill"
+            style={{ transform: 'scaleX(0)' }}
           />
-        ))}
-      </div>
-
-      <footer className="metrics__progress-rule">
-        <span
-          className="metrics__progress-fill"
-          style={{ transform: `scaleX(${(activeIndex + 1) / metrics.length})` }}
-        />
-      </footer>
+        </footer>
+      </section>
 
       <style jsx>{`
-        .metrics {
+        /* Outer wrapper — 350vh tall: 50vh entry buffer + 300vh of slide-progression
+           (6 slides × 50vh each). One typical scroll swipe (~40-60vh) advances
+           one slide cleanly. Smaller per-slide windows = snappier feel without
+           sacrificing the sticky pin. */
+        .metrics-scroll-zone {
           position: relative;
+          height: 350vh;
           background: var(--ink);
+        }
+
+        /* Inner pinned viewport — sticks to the top of the viewport during the
+           parent's full 700vh scroll, then releases naturally into the next section. */
+        .metrics-pinned {
+          position: sticky;
+          top: 0;
           height: 100vh;
           height: 100svh;
           overflow: hidden;
+          background: var(--ink);
         }
 
         .metrics__masthead {
@@ -346,17 +412,11 @@ export default function MetricsWall() {
           font-feature-settings: 'tnum' 1;
         }
 
-        .metrics__track {
+        /* Stage holds all slides stacked absolutely. Active slide fades in. */
+        .metrics__stage {
+          position: relative;
+          width: 100%;
           height: 100%;
-          overflow-y: scroll;
-          overflow-x: hidden;
-          scroll-snap-type: y mandatory;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-          overscroll-behavior-y: auto;
-        }
-        .metrics__track::-webkit-scrollbar {
-          display: none;
         }
 
         .metrics__progress-rule {
@@ -373,10 +433,18 @@ export default function MetricsWall() {
           height: 100%;
           background: var(--accent);
           transform-origin: left center;
-          transition: transform 420ms var(--ease-out);
           will-change: transform;
         }
+
+        /* Mobile: same tighter scroll zone as desktop. Touch swipes typically
+           travel ~70-80vh per gesture, so 50vh per slide may slightly overshoot
+           into the next slide — that feels responsive, not broken. */
+        @media (max-width: 640px) {
+          .metrics-scroll-zone {
+            height: 320vh;
+          }
+        }
       `}</style>
-    </section>
+    </div>
   );
 }
