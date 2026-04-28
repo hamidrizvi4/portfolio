@@ -169,11 +169,18 @@ export async function POST(req: NextRequest) {
   if (!geminiResponse.ok) {
     const errorText = await geminiResponse.text();
     console.error('Gemini error:', geminiResponse.status, errorText);
+    let errorDetail = 'Gemini returned an error.';
+    try {
+      const parsed = JSON.parse(errorText);
+      errorDetail = parsed?.error?.message || errorDetail;
+    } catch {
+      // Use generic message
+    }
     return new Response(
       JSON.stringify({
         error: geminiResponse.status === 429
           ? 'Rate limited — try again in a moment.'
-          : 'Gemini returned an error.',
+          : errorDetail,
       }),
       { status: geminiResponse.status, headers: { 'Content-Type': 'application/json' } }
     );

@@ -44,14 +44,15 @@ interface Photo {
 const PHOTOS: Photo[] = [
   // Example with real image (uncomment and update once uploaded):
   // { id: 'p1', src: '/photos/01.jpg', alt: 'Street scene', caption: 'Street, Lower East Side', location: 'NYC' },
-  { id: 'p1', src: null, alt: 'Photo placeholder 1', caption: 'Street, Lower East Side', location: 'NYC' },
-  { id: 'p2', src: null, alt: 'Photo placeholder 2', caption: 'Light study', location: 'Chelsea' },
-  { id: 'p3', src: null, alt: 'Photo placeholder 3', caption: 'Subway portrait', location: 'NYC' },
-  { id: 'p4', src: null, alt: 'Photo placeholder 4', caption: 'Brooklyn rooftops', location: 'Williamsburg' },
-  { id: 'p5', src: null, alt: 'Photo placeholder 5', caption: 'Late night diner', location: 'Midtown' },
-  { id: 'p6', src: null, alt: 'Photo placeholder 6', caption: 'Bridge at dusk', location: 'Brooklyn Bridge' },
-  { id: 'p7', src: null, alt: 'Photo placeholder 7', caption: 'Bookstore window', location: 'West Village' },
-  { id: 'p8', src: null, alt: 'Photo placeholder 8', caption: 'Coffee shop, morning', location: 'NoLita' },
+  { id: 'p1', src: '/photos/6.jpg', alt: 'Photo placeholder 1', caption: 'The Great Lawn', location: 'Central Park' },
+  { id: 'p2', src: '/photos/8.jpg', alt: 'Photo placeholder 2', caption: 'Fountain', location: 'Washington Square Park' },
+  { id: 'p3', src: '/photos/2.jpg', alt: 'Photo placeholder 3', caption: 'Prince Street', location: 'SoHo' },
+  { id: 'p4', src: '/photos/3.jpg', alt: 'Photo placeholder 4', caption: 'Greene Street', location: 'SoHo' },
+  { id: 'p5', src: '/photos/4.jpg', alt: 'Photo placeholder 5', caption: 'Mercer Street', location: 'SoHo' },
+  { id: 'p6', src: '/photos/1.jpg', alt: 'Photo placeholder 6', caption: 'Statue of Liberty', location: 'Liberty Island' },
+  { id: 'p7', src: '/photos/9.jpg', alt: 'Photo placeholder 7', caption: 'West Drive', location: 'Central Park' },
+  { id: 'p8', src: '/photos/7.jpg', alt: 'Photo placeholder 8', caption: 'Cherry blossoms', location: 'Central Park' },
+  { id: 'p9', src: '/photos/5.jpg', alt: 'Photo placeholder 9', caption: 'Linden Terrace', location: 'Fort Tryon Park' },
 ];
 
 // ============================================
