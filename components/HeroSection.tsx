@@ -296,11 +296,11 @@ export default function HeroSection() {
         .hero {
           position: relative;
           min-height: 100vh;
-          min-height: 100svh; /* Safari mobile address bar */
-          padding: 3rem var(--gutter) 2rem;
+          min-height: 100svh;
+          padding: 4rem var(--gutter) 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 1.25rem;
+          gap: 0;
           overflow: hidden;
         }
 
@@ -323,7 +323,7 @@ export default function HeroSection() {
           justify-content: space-between;
           align-items: center;
           gap: 1rem;
-          padding-bottom: 1rem;
+          padding-bottom: 0.75rem;
           border-bottom: 1px solid var(--rule);
         }
 
@@ -338,31 +338,31 @@ export default function HeroSection() {
 
         /* ──────────── PULL QUOTE ──────────── */
         .hero__quote {
+          display: block;
+          max-width: 26ch;
           align-self: flex-end;
-          max-width: 22ch;
           font-family: var(--font-display);
           font-size: clamp(0.95rem, 1.1vw, 1.15rem);
           font-weight: 400;
+          font-style: italic;
           line-height: 1.4;
           color: var(--pulp);
           text-align: right;
           opacity: 0.85;
+          margin-top: 0.25rem;
+          margin-bottom: 0.5rem;
         }
 
         @media (max-width: 900px) {
           .hero {
-            gap: 1.5rem;
             min-height: auto;
           }
-          .hero__display {
-            align-self: flex-start;
-            margin: 1rem 0;
-          }
           .hero__quote {
+            text-align: left;
             align-self: flex-start;
             max-width: 100%;
-            text-align: left;
-            opacity: 0.7;
+            margin-top: 0.25rem;
+            margin-bottom: 0.5rem;
           }
         }
 
@@ -374,6 +374,7 @@ export default function HeroSection() {
           justify-content: center;
           margin: 0;
           color: var(--paper);
+          padding-bottom: 2rem;
         }
 
         .hero__line {
@@ -395,8 +396,8 @@ export default function HeroSection() {
           display: flex;
           justify-content: space-between;
           align-items: flex-end;
-          gap: 2rem;
-          padding-top: 1rem;
+          gap: 1rem;
+          padding-top: 0.75rem;
           border-top: 1px solid var(--rule);
         }
 
@@ -541,7 +542,7 @@ export default function HeroSection() {
         /* ──────────── RESPONSIVE ──────────── */
         @media (max-width: 640px) {
           .hero {
-            padding: 4.5rem 1.75rem 2rem;
+            padding: 3.5rem 1.75rem 1.5rem;
           }
           .display-xl {
             font-size: clamp(2.5rem, 11vw, 4.5rem);
