@@ -49,7 +49,7 @@ export default function AskHamidChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLLIElement>(null);
   const conversationRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -188,7 +188,7 @@ export default function AskHamidChat() {
   const hasMessages = messages.length > 0;
 
   return (
-    <section className="ask-hamid" aria-label="Ask Hamid — live AI chat">
+    <section className="ask-hamid" id="ask" aria-label="Ask Hamid — live AI chat">
       <div className="ask-hamid__inner">
         {/* LEFT — framing */}
         <aside className="ask-hamid__framing">
@@ -251,10 +251,16 @@ export default function AskHamidChat() {
                     </div>
                   </li>
                 ))}
-                <div ref={messagesEndRef} />
+                <li ref={messagesEndRef} aria-hidden="true" />
               </ul>
             )}
           </div>
+
+          {error && (
+            <p className="ask-hamid__error eyebrow" role="status">
+              {error}
+            </p>
+          )}
 
           {/* INPUT */}
           <form className="ask-hamid__form" onSubmit={handleSubmit}>
@@ -527,6 +533,15 @@ export default function AskHamidChat() {
         @keyframes typing-bounce {
           0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
           30% { opacity: 1; transform: translateY(-4px); }
+        }
+
+        /* ERROR */
+        .ask-hamid__error {
+          margin: 0;
+          padding: 0.65rem 1rem;
+          color: var(--accent);
+          border-top: 1px solid var(--rule-strong);
+          background: rgba(255, 74, 28, 0.05);
         }
 
         /* INPUT */

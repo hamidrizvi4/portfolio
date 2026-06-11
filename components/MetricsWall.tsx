@@ -340,7 +340,7 @@ export default function MetricsWall() {
   }, []);
 
   return (
-    <div className="metrics-scroll-zone" ref={wrapperRef}>
+    <div className="metrics-scroll-zone" id="metrics" ref={wrapperRef}>
       <section className="metrics-pinned" aria-label="Headline metrics">
         <header className="metrics__masthead">
           <span className="eyebrow">02 / 06 — Metrics</span>
@@ -383,7 +383,7 @@ export default function MetricsWall() {
         }
 
         /* Inner pinned viewport — sticks to the top of the viewport during the
-           parent's full 700vh scroll, then releases naturally into the next section. */
+           parent's full 350vh scroll, then releases naturally into the next section. */
         .metrics-pinned {
           position: sticky;
           top: 0;
