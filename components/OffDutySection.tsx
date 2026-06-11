@@ -96,6 +96,9 @@ function PhotoCarousel() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  // True while the last mouse interaction was a drag — suppresses the click
+  // that fires on release so dragging doesn't accidentally open the lightbox.
+  const didDragRef = useRef(false);
 
   // Drag-to-scroll (desktop)
   useEffect(() => {
@@ -107,6 +110,7 @@ function PhotoCarousel() {
 
     const onMouseDown = (e: MouseEvent) => {
       isDown = true;
+      didDragRef.current = false;
       el.classList.add('is-grabbing');
       startX = e.pageX - el.offsetLeft;
       scrollLeft = el.scrollLeft;
@@ -124,6 +128,7 @@ function PhotoCarousel() {
       e.preventDefault();
       const x = e.pageX - el.offsetLeft;
       const walk = (x - startX) * 1.5; // Drag multiplier
+      if (Math.abs(x - startX) > 5) didDragRef.current = true;
       el.scrollLeft = scrollLeft - walk;
     };
 
@@ -170,6 +175,7 @@ function PhotoCarousel() {
 
   // ============ LIGHTBOX HANDLERS ============
   const openLightbox = useCallback((idx: number) => {
+    if (didDragRef.current) return; // Drag release, not a deliberate click
     const photo = PHOTOS[idx];
     if (!photo?.src) return; // Don't open for placeholders
     setLightboxIdx(idx);
@@ -1172,7 +1178,7 @@ function CaseStudyTracker() {
 // ============================================
 export default function OffDutySection() {
   return (
-    <section className="off-duty" aria-label="Off-duty interests">
+    <section className="off-duty" id="off-duty" aria-label="Off-duty interests">
       <header className="off-duty__masthead">
         <span className="eyebrow">05 / 06 — Off-duty</span>
         <p className="off-duty__intro display">

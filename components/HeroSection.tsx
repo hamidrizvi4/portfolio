@@ -55,9 +55,10 @@ function DecryptText({ text, delay = 0, duration = 800, className = '', italic =
       return () => clearTimeout(t);
     }
 
+    let frameId = 0;
+
     const startTimeout = setTimeout(() => {
       const startTime = performance.now();
-      let frameId: number;
 
       const tick = (now: number) => {
         const elapsed = now - startTime;
@@ -85,10 +86,12 @@ function DecryptText({ text, delay = 0, duration = 800, className = '', italic =
         }
       };
       frameId = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(frameId);
     }, delay);
 
-    return () => clearTimeout(startTimeout);
+    return () => {
+      clearTimeout(startTimeout);
+      cancelAnimationFrame(frameId);
+    };
   }, [text, delay, duration]);
 
   return (
@@ -223,7 +226,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="hero" aria-label="Introduction">
+    <section className="hero" id="hero" aria-label="Introduction">
       <GrainField />
 
       {/* Top masthead strip — index, name, time */}

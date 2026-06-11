@@ -160,6 +160,7 @@ function Chapter({ project, isLast }: ChapterProps) {
             <a
               className="card--cta"
               href={project.cta.href}
+              data-placeholder={project.cta.placeholder ? 'true' : undefined}
               target={project.cta.placeholder ? undefined : '_blank'}
               rel={project.cta.placeholder ? undefined : 'noopener noreferrer'}
               onClick={(e) => {
@@ -503,7 +504,7 @@ function RevealCard({ children, delay = 0 }: RevealCardProps) {
 // ============================================
 export default function CaseStudyScrollytell() {
   return (
-    <section className="case-studies" aria-label="Case studies">
+    <section className="case-studies" id="work" aria-label="Case studies">
       <header className="case-studies__masthead">
         <span className="eyebrow">03 / 06 — Case studies</span>
         <p className="case-studies__intro display">

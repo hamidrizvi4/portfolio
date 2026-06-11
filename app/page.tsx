@@ -12,6 +12,9 @@
  * Each section is a self-contained client component with its own animations,
  * state, and styles (via styled-jsx). They share design tokens through the
  * CSS variables defined in app/globals.css.
+ *
+ * GlassNav is the floating liquid-glass tab bar pinned to the bottom of the
+ * viewport — one tab per section, scroll-spy highlights the active one.
  */
 
 import HeroSection from '@/components/HeroSection';
@@ -20,6 +23,7 @@ import CaseStudyScrollytell from '@/components/CaseStudyScrollytell';
 import AskHamidChat from '@/components/AskHamidChat';
 import OffDutySection from '@/components/OffDutySection';
 import ContactSection from '@/components/ContactSection';
+import GlassNav from '@/components/GlassNav';
 
 export default function HomePage() {
   return (
@@ -30,6 +34,7 @@ export default function HomePage() {
       <AskHamidChat />
       <OffDutySection />
       <ContactSection />
+      <GlassNav />
     </main>
   );
 }

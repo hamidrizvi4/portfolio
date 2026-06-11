@@ -43,16 +43,41 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) return;
 
-    let frameId: number;
+    let frameId = 0;
     let currentX = 0;
     let currentY = 0;
     let targetX = 0;
     let targetY = 0;
     let isHovering = false;
+    let isAnimating = false;
 
     const MAGNETIC_RADIUS = 120; // pixels
     const MAX_TRANSLATE = 12; // pixels
     const LERP = 0.18;
+
+    const tick = () => {
+      currentX += (targetX - currentX) * LERP;
+      currentY += (targetY - currentY) * LERP;
+
+      // Settle: stop the rAF loop once the spring has converged, so idle
+      // buttons don't burn frames.
+      if (Math.abs(targetX - currentX) < 0.05 && Math.abs(targetY - currentY) < 0.05) {
+        currentX = targetX;
+        currentY = targetY;
+        inner.style.transform = `translate(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px)`;
+        isAnimating = false;
+        return;
+      }
+
+      inner.style.transform = `translate(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px)`;
+      frameId = requestAnimationFrame(tick);
+    };
+
+    const wake = () => {
+      if (isAnimating) return;
+      isAnimating = true;
+      frameId = requestAnimationFrame(tick);
+    };
 
     const onMouseMove = (e: MouseEvent) => {
       const rect = button.getBoundingClientRect();
@@ -67,10 +92,12 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
         const strength = 1 - dist / MAGNETIC_RADIUS;
         targetX = (dx / MAGNETIC_RADIUS) * MAX_TRANSLATE * strength;
         targetY = (dy / MAGNETIC_RADIUS) * MAX_TRANSLATE * strength;
+        wake();
       } else if (isHovering) {
         isHovering = false;
         targetX = 0;
         targetY = 0;
+        wake();
       }
     };
 
@@ -78,18 +105,11 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
       isHovering = false;
       targetX = 0;
       targetY = 0;
-    };
-
-    const tick = () => {
-      currentX += (targetX - currentX) * LERP;
-      currentY += (targetY - currentY) * LERP;
-      inner.style.transform = `translate(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px)`;
-      frameId = requestAnimationFrame(tick);
+      wake();
     };
 
     window.addEventListener('mousemove', onMouseMove);
     button.addEventListener('mouseleave', onMouseLeave);
-    tick();
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove);
@@ -248,7 +268,7 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
 
 export default function ContactSection() {
   return (
-    <section className="contact" aria-label="Contact">
+    <section className="contact" id="contact" aria-label="Contact">
       <header className="contact__masthead">
         <span className="eyebrow">06 / 06 — Contact</span>
       </header>
@@ -402,7 +422,8 @@ export default function ContactSection() {
 
         /* COLOPHON */
         .colophon {
-          padding: 3rem var(--gutter);
+          /* Extra bottom padding clears the floating glass nav */
+          padding: 3rem var(--gutter) calc(6rem + env(safe-area-inset-bottom, 0px));
           border-top: 1px solid var(--rule);
           background: var(--ink-2);
         }
