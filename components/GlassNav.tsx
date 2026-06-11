@@ -31,9 +31,10 @@ const TABS: NavTab[] = [
     id: 'hero',
     label: 'Intro',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 11l9-8 9 8" />
-        <path d="M5 9.5V21h14V9.5" />
+      // House — filled roof, open door, like SF Symbols "house"
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2.5 10.5 12 3l9.5 7.5" />
+        <path d="M4.5 8.8V20a.5.5 0 0 0 .5.5h4.5v-5a2.5 2.5 0 0 1 5 0v5H19a.5.5 0 0 0 .5-.5V8.8" />
       </svg>
     ),
   },
@@ -41,11 +42,11 @@ const TABS: NavTab[] = [
     id: 'metrics',
     label: 'Metrics',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 20V10" />
-        <path d="M10 20V4" />
-        <path d="M16 20v-8" />
-        <path d="M22 20H2" />
+      // Three bars with rounded tops, ascending — SF "chart.bar"
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <rect x="2.5" y="13" width="4" height="8" rx="1.25" />
+        <rect x="10" y="8" width="4" height="13" rx="1.25" />
+        <rect x="17.5" y="4" width="4" height="17" rx="1.25" />
       </svg>
     ),
   },
@@ -53,10 +54,12 @@ const TABS: NavTab[] = [
     id: 'work',
     label: 'Work',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="7" width="18" height="13" rx="2" />
-        <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        <path d="M3 12h18" />
+      // Briefcase — SF "briefcase"
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="7.5" width="20" height="14" rx="2.5" />
+        <path d="M15.5 7.5V6a3.5 3.5 0 0 0-7 0v1.5" />
+        <line x1="2" y1="13" x2="22" y2="13" />
+        <line x1="12" y1="11.5" x2="12" y2="14.5" strokeWidth="2" />
       </svg>
     ),
   },
@@ -64,9 +67,12 @@ const TABS: NavTab[] = [
     id: 'ask',
     label: 'Ask',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 12a8 8 0 0 1-8 8H4l2.5-2.7A8 8 0 1 1 21 12z" />
-        <path d="M9 11.5h.01M12.5 11.5h.01M16 11.5h.01" strokeWidth="2.2" />
+      // Filled speech bubble with waveform dots — SF "bubble.left.and.bubble.right"
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3C7.03 3 3 6.58 3 11c0 1.9.7 3.65 1.87 5.06L3.5 21l5.08-1.52A9.66 9.66 0 0 0 12 20c4.97 0 9-3.58 9-8s-4.03-9-9-9z" />
+        <circle cx="8.5" cy="11" r="1" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="11" r="1" fill="currentColor" stroke="none" />
+        <circle cx="15.5" cy="11" r="1" fill="currentColor" stroke="none" />
       </svg>
     ),
   },
@@ -74,9 +80,11 @@ const TABS: NavTab[] = [
     id: 'off-duty',
     label: 'Off-duty',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z" />
-        <circle cx="12" cy="13" r="3.5" />
+      // Camera — SF "camera" style, with inner lens circle
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 9a2 2 0 0 1 2-2h1.5l1.8-2.5h5.4L14.5 7H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9z" />
+        <circle cx="12" cy="13.5" r="3.5" />
+        <circle cx="12" cy="13.5" r="1.5" fill="currentColor" stroke="none" opacity="0.5" />
       </svg>
     ),
   },
@@ -84,9 +92,10 @@ const TABS: NavTab[] = [
     id: 'contact',
     label: 'Contact',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="M3 7l9 6 9-6" />
+      // Envelope with a neat chevron fold — SF "envelope"
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5.5" width="20" height="14" rx="2.5" />
+        <polyline points="2,8 12,14.5 22,8" />
       </svg>
     ),
   },
@@ -257,11 +266,10 @@ export default function GlassNav() {
         }
 
         .glass-nav__label {
-          font-family: var(--font-mono);
-          font-size: 0.55rem;
+          font-family: var(--font-sans);
+          font-size: 0.6rem;
           font-weight: 500;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
+          letter-spacing: 0.01em;
           line-height: 1;
           white-space: nowrap;
         }
@@ -321,8 +329,8 @@ export default function GlassNav() {
             height: 18px;
           }
           .glass-nav__label {
-            font-size: 0.5rem;
-            letter-spacing: 0.04em;
+            font-size: 0.55rem;
+            letter-spacing: 0;
           }
         }
 
