@@ -17,7 +17,7 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Hamid Rizvi — AI Product Manager',
   description:
-    'AI Product Manager turning AI capabilities into shipped products. NYU Stern May 2026. Currently building production RAG at LexTrack AI.',
+    'AI Product Manager turning AI capabilities into shipped products. NYU Stern \'26. Currently building production RAG at LexTrack AI.',
   authors: [{ name: 'Hamid Rizvi' }],
   keywords: [
     'AI Product Manager',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Hamid Rizvi — AI Product Manager',
     description:
-      'Turning AI capabilities into shipped products. Available May 2026.',
+      'Turning AI capabilities into shipped products. Available now.',
     type: 'website',
     locale: 'en_US',
     siteName: 'Hamid Rizvi',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Hamid Rizvi — AI Product Manager',
     description:
-      'Turning AI capabilities into shipped products. Available May 2026.',
+      'Turning AI capabilities into shipped products. Available now.',
   },
   robots: {
     index: true,

@@ -275,9 +275,9 @@ export default function ContactSection() {
 
       <div className="contact__inner">
         <h2 className="contact__display display">
-          Currently looking for full-time{' '}
+          Looking for full-time{' '}
           <em>PM roles</em>
-          ,<br /> May 2026.
+          .<br /> Available now.
         </h2>
 
         <p className="contact__sub">
@@ -285,6 +285,19 @@ export default function ContactSection() {
         </p>
 
         <div className="contact__buttons">
+          <MagneticButton
+            href={profile.resume}
+            label="Download résumé (PDF)"
+            meta="RESUME"
+            external
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2.5h8L19.5 8v12a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20V4A1.5 1.5 0 0 1 6 2.5z" />
+                <path d="M14 2.5V8h5.5" />
+                <path d="M12 11v6m0 0l-2.5-2.5M12 17l2.5-2.5" />
+              </svg>
+            }
+          />
           <MagneticButton
             href={`mailto:${profile.email}`}
             label={profile.email}
