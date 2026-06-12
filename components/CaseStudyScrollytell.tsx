@@ -21,6 +21,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { caseStudies, type CaseStudy } from '@/lib/personal-data';
 
 // ============================================
@@ -154,6 +155,24 @@ function Chapter({ project, isLast }: ChapterProps) {
             ))}
           </ul>
         </RevealCard>
+
+        {project.deepDive && (
+          <RevealCard delay={175}>
+            <Link className="card--deep" href={project.deepDive}>
+              <span className="card__eyebrow eyebrow">Go deeper</span>
+              <span className="card__deep-row">
+                <span className="card__deep-label">
+                  For more detail, read the deep case study
+                </span>
+                <span className="card__deep-sub">
+                  Context · my role · the hard decisions · tradeoffs · outcomes
+                  · what I&apos;d do differently
+                </span>
+              </span>
+              <span className="card__deep-arrow" aria-hidden="true">→</span>
+            </Link>
+          </RevealCard>
+        )}
 
         {project.cta && (
           <RevealCard delay={200}>
@@ -408,6 +427,77 @@ function RevealCard({ children, delay = 0 }: RevealCardProps) {
           color: var(--accent);
           font-family: var(--font-mono);
           font-weight: 500;
+        }
+
+        /* DEEP DIVE card — accent-bordered link to /work/[slug] */
+        :global(.card--deep) {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          grid-template-areas:
+            'eyebrow eyebrow'
+            'text arrow';
+          align-items: center;
+          gap: 0.75rem 1rem;
+          text-decoration: none;
+          color: var(--paper);
+          padding: 1.25rem 1.5rem;
+          margin-top: 1rem;
+          border: 1px solid var(--accent);
+          border-radius: 4px;
+          background: linear-gradient(135deg, rgba(255, 74, 28, 0.06) 0%, transparent 100%);
+          transition:
+            background var(--dur-fast) var(--ease-out),
+            transform var(--dur-fast) var(--ease-out),
+            box-shadow var(--dur-fast) var(--ease-out);
+        }
+        :global(.card--deep .card__eyebrow) {
+          grid-area: eyebrow;
+          display: block;
+          border-bottom: 1px solid var(--rule);
+          color: var(--accent);
+          padding-bottom: 0.75rem;
+          margin-bottom: 0;
+        }
+        :global(.card__deep-row) {
+          grid-area: text;
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+          min-width: 0;
+        }
+        :global(.card__deep-label) {
+          font-family: var(--font-display);
+          font-style: italic;
+          font-weight: 400;
+          font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+          color: var(--paper);
+          letter-spacing: -0.01em;
+          line-height: 1.25;
+        }
+        :global(.card__deep-sub) {
+          font-family: var(--font-mono);
+          font-size: 0.62rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--pulp);
+          line-height: 1.5;
+        }
+        :global(.card__deep-arrow) {
+          grid-area: arrow;
+          font-family: var(--font-mono);
+          font-size: 1.4rem;
+          color: var(--accent);
+          transition: transform 220ms var(--ease-out);
+        }
+        @media (hover: hover) and (pointer: fine) {
+          :global(.card--deep:hover) {
+            background: linear-gradient(135deg, rgba(255, 74, 28, 0.12) 0%, rgba(255, 74, 28, 0.03) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px var(--accent-glow);
+          }
+          :global(.card--deep:hover .card__deep-arrow) {
+            transform: translateX(4px);
+          }
         }
 
         /* CTA card — bordered link to GitHub repo or demo video */

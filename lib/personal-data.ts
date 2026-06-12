@@ -19,8 +19,11 @@ export const profile = {
   linkedin: 'https://linkedin.com/in/hamid-rizvi',
   github: 'https://github.com/hamidrizvi4',
 
+  // Path to the downloadable resume PDF (served from /public)
+  resume: '/Hamid-Rizvi-Resume.pdf',
+
   // Status line for the contact section
-  availability: 'Graduating May 2026 — currently interviewing for full-time PM roles.',
+  availability: 'NYU Stern \'26 grad — interviewing for full-time PM roles now.',
 
   // The "about" paragraph, three flavors based on role-switcher
   bio: {
@@ -95,6 +98,8 @@ export interface CaseStudy {
   impact: string[];
   links?: { label: string; url: string }[];
   accent?: 'vermilion' | 'paper' | 'pulp';
+  /** Route to the long-form decision narrative at /work/[slug] */
+  deepDive?: string;
   cta?: {
     type: 'github' | 'demo';
     label: string;
@@ -122,6 +127,7 @@ export const caseStudies: CaseStudy[] = [
       '$2M+ TAM identified through 25+ user interviews',
     ],
     accent: 'vermilion',
+    deepDive: '/work/lextrack',
     cta: {
       type: 'demo',
       label: 'Watch the product demo',
@@ -134,9 +140,9 @@ export const caseStudies: CaseStudy[] = [
     index: '02',
     title: 'QuadTax',
     role: 'Founder & Lead Engineer',
-    period: 'Mar 2026 — Present',
+    period: 'Apr 2026 — Present',
     stack: ['Next.js', 'FastAPI', 'OpenAI', 'Pydantic', 'Tesseract OCR'],
-    hero: 'AI tax filing for 2M+ nonresident aliens in the US.',
+    hero: 'AI tax filing for 1.5M international students in the US.',
     problem: 'F-1/J-1 visa holders face the same tax filing nightmare every April: confusing IRS rules, FICA tax illegally withheld by employers (IRC § 3121(b)(19)), and a market underserved by TurboTax. Manual prep takes 35+ minutes per return and the math errors are common.',
     build: 'Hybrid execution engine. LLM agents handle reasoning (residency determination, treaty evaluation, document parsing) while pure Python handles the math (tax brackets, regulatory lookups). 100% mathematical accuracy guaranteed because the deterministic zone never sees the LLM. OCR pipeline (Tesseract + pdfplumber) extracts W-2, 1042-S, I-94 data automatically. Generates official IRS forms (1040-NR, 8843, 8833) as PDFs.',
     impact: [
@@ -146,6 +152,7 @@ export const caseStudies: CaseStudy[] = [
       'FICA recovery module identifies illegal withholding',
     ],
     accent: 'paper',
+    deepDive: '/work/quadtax',
     cta: {
       type: 'github',
       label: 'Check out the GitHub repo',

@@ -268,7 +268,7 @@ export default function HeroSection() {
             Now · Building production RAG at LexTrack AI · NYC
           </p>
           <p className="hero__sub body">
-            New York University · M.S. Technology Management · May 2026<br />
+            New York University · M.S. Technology Management · Class of 2026<br />
             B.Tech Computer Science Engineering · 2024
           </p>
           <ul className="hero__certs" aria-label="Certifications">
@@ -287,6 +287,15 @@ export default function HeroSection() {
               <span className="hero__cert-label">Google Project Management Professional</span>
             </li>
           </ul>
+          <a
+            className="hero__resume"
+            href="/Hamid-Rizvi-Resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="hero__resume-label">Résumé</span>
+            <span className="hero__resume-arrow" aria-hidden="true">↓ PDF</span>
+          </a>
         </div>
 
         <div className={`hero__scroll-cue ${scrolled ? 'is-hidden' : ''}`} aria-hidden="true">
@@ -510,6 +519,45 @@ export default function HeroSection() {
           font-size: 0.7rem;
           opacity: 0.5;
           user-select: none;
+        }
+
+        /* ──────────── RESUME PILL ──────────── */
+        .hero__resume {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          align-self: flex-start;
+          margin-top: 0.35rem;
+          padding: 0.45rem 0.9rem;
+          border: 1px solid var(--accent);
+          border-radius: 999px;
+          font-family: var(--font-mono);
+          font-size: 0.62rem;
+          font-weight: 500;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--paper);
+          text-decoration: none;
+          transition:
+            background var(--dur-fast) var(--ease-out),
+            color var(--dur-fast) var(--ease-out),
+            transform var(--dur-fast) var(--ease-out);
+        }
+
+        .hero__resume-arrow {
+          color: var(--accent);
+          transition: color var(--dur-fast) var(--ease-out);
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .hero__resume:hover {
+            background: var(--accent);
+            color: var(--ink);
+            transform: translateY(-1px);
+          }
+          .hero__resume:hover .hero__resume-arrow {
+            color: var(--ink);
+          }
         }
 
         /* ──────────── SCROLL CUE ──────────── */
