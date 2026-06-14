@@ -275,6 +275,18 @@ export const interests = [
 ] as const;
 
 // ============================================
+// TESTIMONIALS — social proof strip
+// Replace the placeholder values with real quotes before publishing.
+// ============================================
+export const testimonials = [
+  {
+    quote: "Hamid owned the LexTrack reservation template end-to-end — scoped the architecture, ran the user interviews, wrote the code, and shipped 50 active restaurant partners in 8 weeks. Most interns pick one of those things.",
+    name: "Replace with Name",
+    title: "Replace with Title, LexTrack AI",
+  },
+] as const;
+
+// ============================================
 // SKILLS — for the chat context + skills strip
 // ============================================
 export const skills = {

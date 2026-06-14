@@ -595,7 +595,7 @@ export default function HeroSection() {
         /* ──────────── RESPONSIVE ──────────── */
         @media (max-width: 640px) {
           .hero {
-            padding: 3.5rem 1.75rem 1.5rem;
+            padding: 3.5rem 1.75rem calc(5rem + env(safe-area-inset-bottom, 0px));
           }
           .hero__display {
             flex: 0 0 auto;
