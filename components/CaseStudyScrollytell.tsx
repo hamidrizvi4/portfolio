@@ -615,6 +615,14 @@ export default function CaseStudyScrollytell() {
           position: relative;
         }
 
+        /* Extra bottom clearance on mobile so the last CTA/deep-dive card
+           isn't hidden behind the fixed glass nav */
+        @media (max-width: 900px) {
+          .case-studies__chapters {
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+          }
+        }
+
         .case-studies__masthead {
           padding: 6rem var(--gutter) 2rem;
           border-bottom: 1px solid var(--rule);

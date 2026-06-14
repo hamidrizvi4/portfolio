@@ -22,6 +22,7 @@ import MetricsWall from '@/components/MetricsWall';
 import CaseStudyScrollytell from '@/components/CaseStudyScrollytell';
 import AskHamidChat from '@/components/AskHamidChat';
 import OffDutySection from '@/components/OffDutySection';
+import TestimonialStrip from '@/components/TestimonialStrip';
 import ContactSection from '@/components/ContactSection';
 import GlassNav from '@/components/GlassNav';
 
@@ -33,6 +34,7 @@ export default function HomePage() {
       <CaseStudyScrollytell />
       <AskHamidChat />
       <OffDutySection />
+      <TestimonialStrip />
       <ContactSection />
       <GlassNav />
     </main>

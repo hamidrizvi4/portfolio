@@ -190,29 +190,23 @@ export default function GlassNav() {
           transition:
             opacity 600ms var(--ease-drawer),
             transform 600ms var(--ease-drawer);
-          /* The liquid glass pill */
+          /* Apple Liquid Glass — truly transparent, show-through pill */
           border-radius: 999px;
           background:
             linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.1) 0%,
-              rgba(255, 255, 255, 0.03) 40%,
-              rgba(255, 255, 255, 0.01) 100%
-            ),
-            radial-gradient(
-              120% 160% at 50% -30%,
-              rgba(255, 255, 255, 0.12) 0%,
-              transparent 55%
-            ),
-            rgba(20, 19, 16, 0.55);
-          backdrop-filter: blur(24px) saturate(180%);
-          -webkit-backdrop-filter: blur(24px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+              160deg,
+              rgba(255, 255, 255, 0.20) 0%,
+              rgba(255, 255, 255, 0.08) 50%,
+              rgba(255, 255, 255, 0.04) 100%
+            );
+          backdrop-filter: blur(40px) saturate(200%) brightness(1.01);
+          -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.01);
+          border: 1px solid rgba(255, 255, 255, 0.55);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.18),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-            0 12px 40px rgba(0, 0, 0, 0.45),
-            0 2px 8px rgba(0, 0, 0, 0.3);
+            inset 0 1.5px 0 rgba(255, 255, 255, 0.80),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+            0 8px 32px rgba(0, 0, 0, 0.10),
+            0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .glass-nav.is-mounted {
@@ -274,19 +268,20 @@ export default function GlassNav() {
           white-space: nowrap;
         }
 
-        /* Active tab — its own lighter glass bubble, iOS-style */
+        /* Active tab — slightly denser glass bubble to show selection */
         .glass-nav__tab.is-active {
           color: var(--paper);
           background:
             linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.16) 0%,
-              rgba(255, 255, 255, 0.06) 100%
+              160deg,
+              rgba(255, 255, 255, 0.50) 0%,
+              rgba(255, 255, 255, 0.22) 100%
             );
-          border-color: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.70);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.2),
-            0 2px 12px rgba(0, 0, 0, 0.25);
+            inset 0 1.5px 0 rgba(255, 255, 255, 0.90),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+            0 2px 8px rgba(0, 0, 0, 0.07);
         }
 
         .glass-nav__tab.is-active .glass-nav__icon {
@@ -296,7 +291,7 @@ export default function GlassNav() {
         @media (hover: hover) and (pointer: fine) {
           .glass-nav__tab:not(.is-active):hover {
             color: var(--paper-dim);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.04);
           }
         }
 
@@ -305,10 +300,11 @@ export default function GlassNav() {
           outline-offset: 2px;
         }
 
-        /* Fallback for browsers without backdrop-filter: solid-ish pill */
-        @supports not (backdrop-filter: blur(24px)) {
+        /* Fallback for browsers without backdrop-filter */
+        @supports not (backdrop-filter: blur(1px)) {
           .glass-nav {
-            background: rgba(20, 19, 16, 0.92);
+            background: rgba(248, 245, 239, 0.94);
+            border-color: rgba(0, 0, 0, 0.10);
           }
         }
 

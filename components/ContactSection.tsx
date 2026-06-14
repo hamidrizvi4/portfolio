@@ -204,16 +204,16 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
           align-items: center;
           justify-content: center;
           background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0) 100%),
-            radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 60%),
-            rgba(255, 255, 255, 0.04);
+            linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0.40) 100%),
+            radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.90) 0%, transparent 60%),
+            rgba(255, 255, 255, 0.65);
           backdrop-filter: blur(20px) saturate(180%);
           -webkit-backdrop-filter: blur(20px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(0, 0, 0, 0.08);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.15),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-            0 4px 16px rgba(0, 0, 0, 0.3);
+            inset 0 1px 0 rgba(255, 255, 255, 0.95),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.07),
+            0 4px 16px rgba(0, 0, 0, 0.08);
           color: var(--paper);
           transition:
             transform 280ms var(--ease-out),
@@ -224,7 +224,7 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
         .glass-icon :global(svg) {
           width: 20px;
           height: 20px;
-          filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.4));
+          filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
         }
 
         @media (hover: hover) and (pointer: fine) {
@@ -244,12 +244,12 @@ function MagneticButton({ href, label, meta, icon, external = false }: MagneticB
 
           .magnet:hover :global(.glass-icon) {
             transform: scale(1.05);
-            border-color: rgba(255, 74, 28, 0.4);
+            border-color: rgba(255, 74, 28, 0.35);
             color: var(--accent);
             box-shadow:
-              inset 0 1px 0 rgba(255, 255, 255, 0.2),
-              inset 0 -1px 0 rgba(0, 0, 0, 0.2),
-              0 4px 20px rgba(255, 74, 28, 0.25);
+              inset 0 1px 0 rgba(255, 255, 255, 0.95),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+              0 4px 20px rgba(255, 74, 28, 0.20);
           }
         }
 
