@@ -276,13 +276,12 @@ export const interests = [
 
 // ============================================
 // TESTIMONIALS — social proof strip
-// Replace the placeholder values with real quotes before publishing.
 // ============================================
 export const testimonials = [
   {
-    quote: "Hamid owned the LexTrack reservation template end-to-end — scoped the architecture, ran the user interviews, wrote the code, and shipped 50 active restaurant partners in 8 weeks. Most interns pick one of those things.",
-    name: "Replace with Name",
-    title: "Replace with Title, LexTrack AI",
+    quote: "Hamid owned the LexTrack reservation template end-to-end, scoped the hybrid AI architecture, ran the user interviews, wrote the code, shipped, and documented everything in 8 weeks. Most interns pick one of those things.",
+    name: "Santrupth Vedanthi",
+    title: "CEO, LexTrack AI",
   },
 ] as const;
 
