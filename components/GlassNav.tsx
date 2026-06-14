@@ -190,29 +190,29 @@ export default function GlassNav() {
           transition:
             opacity 600ms var(--ease-drawer),
             transform 600ms var(--ease-drawer);
-          /* The liquid glass pill */
+          /* The liquid glass pill — frosted on light background */
           border-radius: 999px;
           background:
             linear-gradient(
               135deg,
-              rgba(255, 255, 255, 0.1) 0%,
-              rgba(255, 255, 255, 0.03) 40%,
-              rgba(255, 255, 255, 0.01) 100%
+              rgba(255, 255, 255, 0.82) 0%,
+              rgba(255, 255, 255, 0.60) 40%,
+              rgba(255, 255, 255, 0.50) 100%
             ),
             radial-gradient(
               120% 160% at 50% -30%,
-              rgba(255, 255, 255, 0.12) 0%,
+              rgba(255, 255, 255, 0.90) 0%,
               transparent 55%
             ),
-            rgba(20, 19, 16, 0.55);
+            rgba(240, 236, 228, 0.55);
           backdrop-filter: blur(24px) saturate(180%);
           -webkit-backdrop-filter: blur(24px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.12);
+          border: 1px solid rgba(255, 255, 255, 0.92);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.18),
-            inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-            0 12px 40px rgba(0, 0, 0, 0.45),
-            0 2px 8px rgba(0, 0, 0, 0.3);
+            inset 0 1px 0 rgba(255, 255, 255, 0.98),
+            inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+            0 8px 32px rgba(0, 0, 0, 0.10),
+            0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .glass-nav.is-mounted {
@@ -280,13 +280,13 @@ export default function GlassNav() {
           background:
             linear-gradient(
               135deg,
-              rgba(255, 255, 255, 0.16) 0%,
-              rgba(255, 255, 255, 0.06) 100%
+              rgba(255, 255, 255, 0.95) 0%,
+              rgba(255, 255, 255, 0.75) 100%
             );
-          border-color: rgba(255, 255, 255, 0.16);
+          border-color: rgba(255, 255, 255, 0.98);
           box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.2),
-            0 2px 12px rgba(0, 0, 0, 0.25);
+            inset 0 1px 0 rgba(255, 255, 255, 1),
+            0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         .glass-nav__tab.is-active .glass-nav__icon {
@@ -296,7 +296,7 @@ export default function GlassNav() {
         @media (hover: hover) and (pointer: fine) {
           .glass-nav__tab:not(.is-active):hover {
             color: var(--paper-dim);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.04);
           }
         }
 
@@ -308,7 +308,7 @@ export default function GlassNav() {
         /* Fallback for browsers without backdrop-filter: solid-ish pill */
         @supports not (backdrop-filter: blur(24px)) {
           .glass-nav {
-            background: rgba(20, 19, 16, 0.92);
+            background: rgba(245, 242, 236, 0.96);
           }
         }
 

@@ -166,7 +166,7 @@ function GrainField() {
       if (Math.random() < 0.4) {
         const grainSize = 1;
         const density = 80; // Particles per frame
-        ctx.fillStyle = 'rgba(244, 241, 234, 0.025)';
+        ctx.fillStyle = 'rgba(15, 14, 12, 0.03)';
         for (let i = 0; i < density; i++) {
           const x = Math.random() * w;
           const y = Math.random() * h;
@@ -321,7 +321,7 @@ export default function HeroSection() {
           inset: 0;
           pointer-events: none;
           z-index: 0;
-          mix-blend-mode: screen;
+          mix-blend-mode: multiply;
         }
 
         .hero > * {
