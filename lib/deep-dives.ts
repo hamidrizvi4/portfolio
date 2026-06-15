@@ -193,6 +193,153 @@ export const deepDives: DeepDive[] = [
       label: 'Check out the GitHub repo',
       href: 'https://github.com/hamidrizvi4/QuadTax',
     },
+    nextSlug: 'analytics',
+  },
+
+  // ==========================================================
+  // AI PURCHASE ANALYTICS
+  // ==========================================================
+  {
+    slug: 'analytics',
+    index: '03',
+    title: 'AI Purchase Analytics',
+    subtitle:
+      'An automated retail intelligence platform that collapsed a 4-hour Excel ritual into a 5-minute dashboard — and why the architecture decision was letting Python do the math and Gemini do the thinking.',
+    role: 'Solo Developer (Personal Project)',
+    period: 'Oct 2025 · New York',
+    stack: ['Python', 'Pandas', 'Gemini', 'Streamlit', 'Plotly', 'Scikit-learn'],
+    context: [
+      'Retail leadership teams spend entire workdays inside Excel every week: pulling customer segments by RFM score, calculating cohort retention by hand, re-running churn risk calculations on updated transaction exports. By the time the deck is ready for Monday\'s standup, the data is 48 hours stale. The analysis is technically correct and operationally useless.',
+      'I\'d seen this firsthand — the problem isn\'t that the math is hard, it\'s that it\'s repetitive, manual, and disconnected from action. The question I wanted to answer: what does the same workflow look like if Pandas handles the computation and Gemini handles the interpretation?',
+    ],
+    myRole: [
+      'Solo developer and product owner. I scoped the feature set, built the full stack (Python data pipeline, Gemini integration, Streamlit front end), and ran it against a real 110K+ transaction dataset to validate the output before treating any of the metrics as real.',
+    ],
+    decisions: [
+      {
+        title: 'LLM interprets; Python computes',
+        setup:
+          'The obvious design for an "AI analytics" tool is to hand the LLM a transaction export and ask it to find insights. I tried this in the first prototype — and the numbers it generated were fabricated with confidence. RFM scores, retention percentages, churn probabilities: all plausible, none accurate.',
+        tradeoff:
+          'Giving Gemini structured output (pre-computed Pandas DataFrames) is more engineering up front but produces accurate insights. Giving it raw data is faster to build but produces hallucinated numbers — which, in a business intelligence context, is worse than no output at all. A wrong churn score isn\'t a bug; it\'s a business decision made on bad data.',
+        call:
+          'Hard split: Pandas handles every calculation — RFM segmentation, cohort retention, churn model training, revenue attribution. Gemini receives only the validated, structured output and generates narrative: what the segments mean, which cohorts are underperforming, what the churn risk profile implies for next quarter\'s retention spend. The LLM never generates a number; it explains the numbers Python generated.',
+        result:
+          'AUC 0.82 on the churn model — validated against held-out test data, not hallucinated. Gemini\'s narrative layer translated the statistical output into plain-English recommendations that a non-technical exec could act on without a data analyst intermediary.',
+      },
+      {
+        title: 'Dashboard over report',
+        setup:
+          'The output format decision: generate a static PDF report (familiar format, printable, shareable by email) or build an interactive Streamlit dashboard (requires a running server, unfamiliar to some execs). PDF is what a consultant would deliver. Dashboard is what a product would ship.',
+        tradeoff:
+          'PDF reports are consumed once and filed. Dashboards get interrogated — a CFO can filter by segment, drill into a specific cohort, or rerun the churn view for just the high-LTV customers. But dashboards require infrastructure and trust: if the server is down or the exec doesn\'t know how to use it, the whole product fails silently.',
+        call:
+          'Dashboard, because the analysis is most valuable when it\'s explorable. Bet on Streamlit\'s low floor: the UI is simple enough that non-technical users navigate it without training. Added Plotly charts with hover tooltips so the data speaks without needing a walkthrough. The PDF export button is in the roadmap — it\'s a lower priority than making the live view genuinely useful first.',
+        result:
+          '95% reporting time reduction — the 4-hour Excel workflow runs in under 5 minutes on the same dataset. 96K+ customer profiles processed in a single pipeline run with no manual intervention.',
+      },
+      {
+        title: 'Build the churn model before proving dashboard ROI',
+        setup:
+          'After the core RFM and cohort views were working, two directions competed for the next sprint: validate that the dashboard actually changed a business decision (proving ROI) or build the churn prediction model (adding the highest-value analytical capability). Proving ROI is the right PM instinct. Building the model was the right product instinct.',
+        tradeoff:
+          'The dashboard without churn prediction is a better Excel. The dashboard with churn prediction is a decision engine — it tells you not just who your customers are but which ones you\'re about to lose and why. That\'s the difference between a reporting tool and an action tool. But the churn model takes meaningful engineering (feature engineering, cross-validation, threshold calibration) and the ROI proof requires external users I didn\'t yet have.',
+        call:
+          'Build the model first. The churn score is the most actionable output in the entire dashboard — "customers in this segment have a 68% probability of churning in the next 30 days" generates a concrete business response in a way that a retention rate graph doesn\'t. The AUC 0.82 result also gave me a quality bar to defend; without it, the churn view would have been aspirational rather than credible.',
+        result:
+          'A 15% improvement in retention targeting accuracy compared to the baseline rule-based approach. The model surfaced a customer segment that was high-spend but high-churn — invisible in aggregate reporting, actionable once isolated.',
+      },
+    ],
+    outcomes: [
+      { stat: '95%', label: 'Reporting time reduction (4 hr → 5 min)' },
+      { stat: '110K+', label: 'Transactions processed in a single pipeline run' },
+      { stat: '96K+', label: 'Customer profiles segmented and scored' },
+      { stat: 'AUC 0.82', label: 'Churn model — 15% improvement over baseline' },
+      { stat: '<5 min', label: 'End-to-end RFM + cohort + churn dashboard runtime' },
+    ],
+    retro: [
+      'Test the dashboard with a non-technical user before calling it done. I validated the numbers but not the experience. The first external demo revealed that the segment naming ("Champions," "At Risk") was obvious to me and opaque to someone who hadn\'t read the RFM literature.',
+      'The churn model needs external validation before the AUC gets presented as a business metric. 0.82 on my test split is a technical result; what matters is whether the model\'s predictions actually drove a different retention action. That feedback loop requires a live integration, not a retrospective analysis.',
+      'The PDF export belongs in v1, not the roadmap. Execs share deliverables by email; a Streamlit URL doesn\'t travel. I optimized for the tool I found more interesting to build, not the format the user would actually distribute.',
+    ],
+    cta: {
+      type: 'github',
+      label: 'Check out the GitHub repo',
+      href: 'https://github.com/hamidrizvi4/Purchase-Analytics-AI',
+    },
+    nextSlug: 'squirrel',
+  },
+
+  // ==========================================================
+  // SQUIRREL AI
+  // ==========================================================
+  {
+    slug: 'squirrel',
+    index: '04',
+    title: 'Squirrel AI',
+    subtitle:
+      'A codebase intelligence tool that gives you plain-English answers about any GitHub repo — and why naive "dump the whole repo into the context window" doesn\'t survive contact with a real codebase.',
+    role: 'Product Vision & Lead Developer',
+    period: '2025',
+    stack: ['React', 'FastAPI', 'OpenAI', 'Embeddings', 'Python'],
+    context: [
+      'Onboarding to a new codebase is the worst part of any engineering job. The README describes the architecture as it was designed, not as it shipped. Code comments are six months stale. The engineer who built the authentication module left in March. Getting up to speed means reading thousands of lines of code and hoping someone has time to answer questions — which they usually don\'t.',
+      'I built Squirrel AI to make that first week shorter. The bet: if you can extract the right structure from a codebase and index it correctly, a language model can answer context-aware questions faster and more accurately than grep or a senior engineer\'s calendar.',
+    ],
+    myRole: [
+      'Product lead and sole developer. I defined the scope (public GitHub repos first, private repos as the v2 target), built the full stack (React frontend, FastAPI backend, OpenAI integration), and ran the extraction and Q&A pipeline against real repositories to validate that the answers were actually useful — not just grammatically plausible.',
+    ],
+    decisions: [
+      {
+        title: 'Extract structure; don\'t rely on the context window',
+        setup:
+          'The naive implementation of a codebase Q&A tool is to clone the repo, concatenate every file, and send the whole thing to the LLM. This works on toy repositories. On a real codebase with 50K+ lines, it fails immediately: most models hit context limits, latency is multi-second, and the signal-to-noise ratio collapses because the model is swimming in irrelevant code.',
+        tradeoff:
+          'Structured extraction (parse functions, classes, imports, file relationships) is more engineering but produces a compact, queryable representation of the codebase. Raw concatenation is simpler to build but only works on repos small enough to fit in a context window — which excludes most interesting targets. The extraction approach trades build time for accuracy and scale.',
+        call:
+          'Build the extraction layer first. For each file in a repo, extract: function and class names, their docstrings and signatures, import relationships, and the file\'s role in the dependency graph. That structured metadata is what the embedding index is built on. The LLM answers questions against retrieved chunks of that index, not against the raw codebase. This means the accuracy of answers depends on the quality of extraction, which is testable — unlike raw context window stuffing.',
+        result:
+          'Multi-language support across 11 languages (Python, JS, TS, Go, Java, Rust, and more) because the extraction layer is language-specific parsers, not a generic LLM prompt. Each parser produces the same structured output regardless of syntax. Answers are grounded in real file paths, function names, and class hierarchies rather than LLM confabulation.',
+      },
+      {
+        title: 'File citations in every answer',
+        setup:
+          'Early prototypes returned plain-text answers: "The authentication logic lives in the user service and validates JWT tokens against the Redis cache." Correct, but unusable — a developer reading that answer still has to grep for it. The tool wasn\'t saving the onboarding time I was trying to save.',
+        tradeoff:
+          'Adding file path citations to every answer requires the retrieval system to know not just what text is relevant but what file it came from. That means maintaining source metadata through the embedding pipeline — an extra engineering requirement that complicates the indexing step. The alternative is plain-text answers that are faster to build and still useful for high-level questions, but miss the navigational value entirely.',
+        call:
+          'Citations are non-negotiable. The whole product value is navigation — knowing where to go, not just what exists. Every answer now includes the source file paths and the specific functions or classes referenced, formatted so a developer can jump directly to the code. The prompt template was redesigned to enforce citation format, and the API validates that cited paths exist in the repo before returning the answer.',
+        result:
+          'Context-aware Q&A with cited file references in every response. Users can follow citations directly to source without a second search step. This also made hallucination visible — if the model cited a file path that doesn\'t exist, the validation layer flags it rather than returning a confident wrong answer.',
+      },
+      {
+        title: 'Cache the analysis, not just the answers',
+        setup:
+          'The first-analysis of a repository is expensive: GitHub API calls to fetch the file tree, extraction across every source file, embedding generation for the index. On a medium-sized repo, this takes 20–40 seconds. That latency is acceptable once; it\'s fatal if it happens on every question.',
+        tradeoff:
+          'Caching the entire analysis (extraction + embeddings) means first-load is slow but every subsequent query is sub-second. Not caching means consistent ~30s latency per question — which makes the tool feel broken even if the answers are good. In-memory cache is simplest but ephemeral (lost on server restart). Persistent cache (disk or DB) survives restarts but adds complexity and storage requirements.',
+        call:
+          'In-memory cache with a TTL, deliberately accepting that cache misses happen if the process restarts. For a first version, the right call is reducing perceived latency for the common case (repeat queries on a repo the user just analyzed) rather than solving the persistence problem that only matters after users return on day two. The cache key is the repo URL + commit SHA — so if the repo updates, the cache invalidates correctly.',
+        result:
+          'Sub-second subsequent queries on any previously analyzed repository. The cold-load time is disclosed to users upfront ("analyzing this repository…") so the wait is expected rather than surprising. The architecture makes persistent caching a two-line change when usage patterns justify it.',
+      },
+    ],
+    outcomes: [
+      { stat: '11', label: 'Languages supported via dedicated extraction parsers' },
+      { stat: '100%', label: 'Answers include cited file references — no citation-free responses' },
+      { stat: '<1s', label: 'Subsequent query latency on cached repositories' },
+      { stat: '0', label: 'Hallucinated file paths returned — validation layer enforces this' },
+    ],
+    retro: [
+      'I built the extraction engine before validating that users found the Q&A answers useful. The right sequence is: get one user to ask ten real questions about a codebase they know, evaluate whether the answers save them time, then build the infrastructure that enables that experience at scale. I did it backwards.',
+      'Multi-language support sounds impressive; Python, JS, and TypeScript handle 90% of the real use cases and the other 8 languages are undertested. I should have shipped 3-language support with high confidence rather than 11-language support with mixed accuracy.',
+      'Private repo support is the actual product. Public GitHub repos are convenient for demos; the onboarding pain I was solving lives in private, company-owned codebases. I scoped to public repos for the MVP, which is the right call, but the roadmap should have been named and sequenced from day one rather than treated as a future consideration.',
+    ],
+    cta: {
+      type: 'github',
+      label: 'Check out the GitHub repo',
+      href: 'https://github.com/hamidrizvi4/Squirrel-AI',
+    },
     nextSlug: 'lextrack',
   },
 ];

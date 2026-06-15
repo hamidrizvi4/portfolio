@@ -176,6 +176,7 @@ export const caseStudies: CaseStudy[] = [
       'Churn prediction AUC 0.82 — 15% improvement in retention targeting',
     ],
     accent: 'pulp',
+    deepDive: '/work/analytics',
     cta: {
       type: 'github',
       label: 'Check out the GitHub repo',
@@ -198,6 +199,7 @@ export const caseStudies: CaseStudy[] = [
       'Cached repo analysis for sub-second subsequent queries',
     ],
     accent: 'pulp',
+    deepDive: '/work/squirrel',
     cta: {
       type: 'github',
       label: 'Check out the GitHub repo',
