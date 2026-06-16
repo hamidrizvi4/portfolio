@@ -265,7 +265,7 @@ export default function HeroSection() {
         <div className="hero__credentials">
           <p className="eyebrow hero__now">
             <span className="hero__now-dot" aria-hidden="true" />
-            Now · Building production RAG at LexTrack AI · NYC
+            Open to full-time PM roles · NYC
           </p>
           <p className="hero__sub body">
             New York University · M.S. Technology Management · Class of 2026<br />

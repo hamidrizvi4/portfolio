@@ -13,7 +13,13 @@ export default function SkillsStrip() {
   return (
     <section className="skills" aria-label="Skills">
       <div className="skills__inner">
-        <p className="eyebrow skills__eyebrow">What I work with</p>
+        <header className="skills__header">
+          <p className="eyebrow skills__eyebrow">Skills</p>
+          <h2 className="skills__title display">
+            The stack.{' '}
+            <em>Built in production.</em>
+          </h2>
+        </header>
         <div className="skills__grid">
           {CATEGORIES.map(({ key, label }) => (
             <div key={key} className="skills__col">
@@ -43,9 +49,28 @@ export default function SkillsStrip() {
           margin: 0 auto;
         }
 
+        .skills__header {
+          margin-bottom: 2.5rem;
+        }
+
         .skills__eyebrow {
           color: var(--accent);
-          margin-bottom: 2.25rem;
+          margin-bottom: 0.75rem;
+        }
+
+        .skills__title {
+          margin: 0;
+          color: var(--paper);
+          font-size: clamp(2.25rem, 5vw, 4rem);
+          font-weight: 300;
+          font-style: italic;
+          line-height: 0.95;
+          letter-spacing: -0.04em;
+        }
+
+        .skills__title :global(em) {
+          color: var(--accent);
+          font-style: italic;
         }
 
         .skills__grid {
