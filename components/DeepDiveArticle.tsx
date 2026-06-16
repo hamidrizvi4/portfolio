@@ -256,9 +256,10 @@ export default function DeepDiveArticle({ dive }: { dive: DeepDive }) {
         .dive__meta-value {
           margin: 0;
           font-size: 0.85rem;
-          line-height: 1.45;
+          line-height: 1.55;
           color: var(--paper-dim);
           max-width: 32ch;
+          white-space: pre-line;
         }
 
         .dive__stack {
