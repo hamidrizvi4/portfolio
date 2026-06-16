@@ -114,7 +114,7 @@ export const caseStudies: CaseStudy[] = [
     index: '01',
     title: 'LexTrack AI',
     role: 'AI/ML Product Engineering Intern · Capstone PM Lead',
-    period: 'Sep 2025 — May 2026',
+    period: 'Feb – May 2026\nSep – Dec 2025',
     stack: ['TypeScript', 'RAG', 'Gemini', 'Prompt Eng', 'Microservices'],
     hero: 'Restaurant onboarding from 30 minutes to 5.',
     problem: 'SMB restaurants needed SevenRooms-grade reservation systems but couldn\'t afford them, and existing no-code tools required 30+ minutes of manual metadata config per merchant — killing time-to-value before users even saw the product.',

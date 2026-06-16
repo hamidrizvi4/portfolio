@@ -271,6 +271,7 @@ function Chapter({ project, isLast }: ChapterProps) {
 
         .chapter__period {
           color: var(--pulp);
+          white-space: pre-line;
         }
 
         .chapter__stack {
