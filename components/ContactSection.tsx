@@ -335,7 +335,7 @@ export default function ContactSection() {
 
         <p className="contact__now eyebrow">
           <span className="contact__live-dot" aria-hidden="true" />
-          Now: building at LexTrack AI · {new Date().getFullYear()}
+          Open to full-time PM roles · NYC
         </p>
       </div>
 
