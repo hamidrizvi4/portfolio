@@ -56,7 +56,7 @@ export const deepDives: DeepDive[] = [
     subtitle:
       'A 0→1 restaurant reservation template inside a 1-click no-code platform — and the architecture decisions that cut onboarding from 30 minutes to 5.',
     role: 'AI/ML Product Engineering Intern · Capstone PM Lead',
-    period: 'Feb – May 2026\nSep – Dec 2025 · New York',
+    period: 'Feb – May 2026\nSep – Dec 2025',
     stack: ['TypeScript', 'RAG', 'Gemini', 'Prompt Engineering', 'Microservices'],
     context: [
       'SMB restaurants want what SevenRooms and OpenTable give the big chains — reservations, waitlists, guest profiles — but the pricing doesn\'t work at their scale. LexTrack\'s bet is a 1-click no-code platform where a merchant generates a custom app instead of buying a legacy one.',

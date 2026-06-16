@@ -15,6 +15,7 @@
 
 import Link from 'next/link';
 import { type DeepDive, getDeepDive } from '@/lib/deep-dives';
+import LexTrackDiagram from '@/components/LexTrackDiagram';
 
 const DECISION_STEPS: { key: keyof Pick<
   DeepDive['decisions'][number],
@@ -90,11 +91,13 @@ export default function DeepDiveArticle({ dive }: { dive: DeepDive }) {
       <section className="dive__section" aria-label="The hard decisions">
         <p className="eyebrow dive__section-eyebrow">03 — The hard decisions</p>
 
-        {dive.architectureDiagram && (
+        {dive.slug === 'lextrack' ? (
+          <LexTrackDiagram />
+        ) : dive.architectureDiagram ? (
           <div className="dive__diagram-wrap">
             <pre className="dive__diagram mono">{dive.architectureDiagram}</pre>
           </div>
-        )}
+        ) : null}
 
         <div className="dive__decisions">
           {dive.decisions.map((decision, i) => (
