@@ -33,6 +33,7 @@ export interface DeepDive {
   stack: string[];
   context: string[];
   myRole: string[];
+  architectureDiagram?: string;
   decisions: Decision[];
   outcomes: Outcome[];
   retro: string[]; // What I'd do differently — numbered, honest
@@ -65,6 +66,50 @@ export const deepDives: DeepDive[] = [
       'I led the reservation template as the capstone PM — a team of 3 engineers and 1 designer, with me writing code alongside them. I owned the problem definition, ran 25+ customer interviews and the competitive analysis (Toast, Square, Lightspeed), made the architecture calls below, and carried the product from zero to 50+ active users in 8 weeks.',
       'After the capstone shipped, LexTrack brought me back as an AI/ML Product Engineering intern. I now own the production side of the same system: RAG pipelines, model evaluation, and the cost/latency budget.',
     ],
+    architectureDiagram: `\
+Merchant: "Describe your restaurant"
+                   │
+                   ▼
+         ┌─────────────────┐
+         │   FIELD ROUTER  │
+         │   (classifier)  │
+         └────────┬────────┘
+                  │
+     ┌────────────┴────────────┐
+     │                         │
+     ▼                         ▼
+┌──────────────┐       ┌───────────────────┐
+│ DETERMINISTIC│       │    GEMINI LLM     │
+│     ZONE     │       │                   │
+│              │       │  Ambiguous only   │
+│ Table counts │       │  Service style    │
+│ Party sizes  │       │  Deposit rules    │
+│ Booking hrs  │       │  Custom notes     │
+│  ~40 fields  │       │   ~40 fields      │
+└──────┬───────┘       └─────────┬─────────┘
+       │                         │
+       │               ┌─────────▼─────────┐
+       │               │    3-LAYER        │
+       │               │    FALLBACK       │
+       │               │  1→ Primary LLM  │
+       │               │  2→ Cached resp  │
+       │               │  3→ Deterministic│
+       │               └─────────┬─────────┘
+       └─────────────────────────┘
+                       │
+                       ▼
+             ┌─────────────────┐
+             │  REVIEW SCREEN  │
+             │ (flagged fields │
+             │  surfaced first)│
+             └────────┬────────┘
+                      │
+                      ▼
+             ┌─────────────────┐
+             │  LIVE APP READY │
+             │  80+ fields     │
+             │  in ~5 minutes  │
+             └─────────────────┘`,
     decisions: [
       {
         title: 'Hybrid AI, not LLM-everywhere',

@@ -90,6 +90,12 @@ export default function DeepDiveArticle({ dive }: { dive: DeepDive }) {
       <section className="dive__section" aria-label="The hard decisions">
         <p className="eyebrow dive__section-eyebrow">03 — The hard decisions</p>
 
+        {dive.architectureDiagram && (
+          <div className="dive__diagram-wrap">
+            <pre className="dive__diagram mono">{dive.architectureDiagram}</pre>
+          </div>
+        )}
+
         <div className="dive__decisions">
           {dive.decisions.map((decision, i) => (
             <div key={decision.title} className="decision">
@@ -305,6 +311,25 @@ export default function DeepDiveArticle({ dive }: { dive: DeepDive }) {
           font-size: clamp(1.15rem, 1.7vw, 1.4rem);
           line-height: 1.5;
           color: var(--paper);
+        }
+
+        /* ──────────── ARCHITECTURE DIAGRAM ──────────── */
+        .dive__diagram-wrap {
+          margin-bottom: 2.5rem;
+          overflow-x: auto;
+          border: 1px solid var(--rule-strong);
+          border-radius: 4px;
+          background: var(--ink-2);
+        }
+
+        .dive__diagram {
+          display: block;
+          padding: 1.5rem clamp(1rem, 2.5vw, 2rem);
+          font-size: 0.68rem;
+          line-height: 1.65;
+          color: var(--paper-dim);
+          white-space: pre;
+          margin: 0;
         }
 
         /* ──────────── DECISIONS ──────────── */
