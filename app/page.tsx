@@ -19,9 +19,11 @@
 
 import HeroSection from '@/components/HeroSection';
 import MetricsWall from '@/components/MetricsWall';
+import SkillsStrip from '@/components/SkillsStrip';
 import CaseStudyScrollytell from '@/components/CaseStudyScrollytell';
 import AskHamidChat from '@/components/AskHamidChat';
 import OffDutySection from '@/components/OffDutySection';
+import ExperienceTimeline from '@/components/ExperienceTimeline';
 import TestimonialStrip from '@/components/TestimonialStrip';
 import ContactSection from '@/components/ContactSection';
 import GlassNav from '@/components/GlassNav';
@@ -31,9 +33,11 @@ export default function HomePage() {
     <main>
       <HeroSection />
       <MetricsWall />
+      <SkillsStrip />
       <CaseStudyScrollytell />
       <AskHamidChat />
       <OffDutySection />
+      <ExperienceTimeline />
       <TestimonialStrip />
       <ContactSection />
       <GlassNav />

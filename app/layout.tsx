@@ -1,23 +1,32 @@
-/**
- * app/layout.tsx
- *
- * The root layout. Wraps every page with:
- *   - <html> + <body> shell with the editorial dark theme
- *   - Global CSS (design tokens, typography, base styles)
- *   - SEO metadata (title, description, OG tags for LinkedIn shares)
- *   - Viewport meta for proper mobile rendering
- *
- * Fonts are loaded via Google Fonts CDN in globals.css. To self-host
- * for better performance, swap to next/font/google — see README.
- */
-
 import type { Metadata, Viewport } from 'next';
+import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  axes: ['opsz', 'SOFT'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hamidrizvi.com'),
   title: 'Hamid Rizvi — AI Product Manager',
   description:
-    'AI Product Manager turning AI capabilities into shipped products. NYU Stern \'26. Currently building production RAG at LexTrack AI.',
+    "AI Product Manager turning AI capabilities into shipped products. NYU Stern '26. Currently building production RAG at LexTrack AI.",
   authors: [{ name: 'Hamid Rizvi' }],
   keywords: [
     'AI Product Manager',
@@ -32,8 +41,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Hamid Rizvi — AI Product Manager',
-    description:
-      'Turning AI capabilities into shipped products. Available now.',
+    description: 'Turning AI capabilities into shipped products. Available now.',
     type: 'website',
     locale: 'en_US',
     siteName: 'Hamid Rizvi',
@@ -41,8 +49,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Hamid Rizvi — AI Product Manager',
-    description:
-      'Turning AI capabilities into shipped products. Available now.',
+    description: 'Turning AI capabilities into shipped products. Available now.',
   },
   robots: {
     index: true,
@@ -62,7 +69,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

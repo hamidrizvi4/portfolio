@@ -28,7 +28,7 @@ export const profile = {
   // The "about" paragraph, three flavors based on role-switcher
   bio: {
     pm: "AI Product Manager at the intersection of technical architecture and product strategy. CS undergrad, NYU Stern grad student, CSPO and CSM certified. I take ambiguous AI capabilities and turn them into shipping products — PRDs that the engineering team can build from on day one because I've already prototyped the hard parts.",
-    engineer: "AI/ML engineer with a product instinct. CS background, currently building production RAG systems and TypeScript microservices at LexTrack AI. I optimize for the boring stuff that matters: latency budgets, cost per query, and the 99.5% uptime that keeps users from rage-quitting.",
+    engineer: "AI/ML engineer with a product instinct. CS background, built production RAG systems and TypeScript microservices at LexTrack AI (ended May 2026). I optimize for the boring stuff that matters: latency budgets, cost per query, and the 99.5% uptime that keeps users from rage-quitting.",
     associate: "Product associate who prototypes before writing the spec. CS undergrad, NYU Stern, CSPO and CSM certified. I drive 0→1 work by getting close to users, the data, and the model — then translate what I learn into roadmaps that ship.",
   },
 } as const;
@@ -114,7 +114,7 @@ export const caseStudies: CaseStudy[] = [
     index: '01',
     title: 'LexTrack AI',
     role: 'AI/ML Product Engineering Intern · Capstone PM Lead',
-    period: 'Sep 2025 — Present',
+    period: 'Feb – May 2026\nSep – Dec 2025',
     stack: ['TypeScript', 'RAG', 'Gemini', 'Prompt Eng', 'Microservices'],
     hero: 'Restaurant onboarding from 30 minutes to 5.',
     problem: 'SMB restaurants needed SevenRooms-grade reservation systems but couldn\'t afford them, and existing no-code tools required 30+ minutes of manual metadata config per merchant — killing time-to-value before users even saw the product.',
@@ -176,6 +176,7 @@ export const caseStudies: CaseStudy[] = [
       'Churn prediction AUC 0.82 — 15% improvement in retention targeting',
     ],
     accent: 'pulp',
+    deepDive: '/work/analytics',
     cta: {
       type: 'github',
       label: 'Check out the GitHub repo',
@@ -198,6 +199,7 @@ export const caseStudies: CaseStudy[] = [
       'Cached repo analysis for sub-second subsequent queries',
     ],
     accent: 'pulp',
+    deepDive: '/work/squirrel',
     cta: {
       type: 'github',
       label: 'Check out the GitHub repo',
@@ -213,7 +215,7 @@ export const experience = [
   {
     company: 'LexTrack AI',
     role: 'AI/ML Product Engineering Intern',
-    period: 'Feb 2026 — Present',
+    period: 'Feb 2026 — May 2026',
     location: 'New York, NY',
   },
   {
@@ -222,19 +224,14 @@ export const experience = [
     period: 'Sep 2025 — Dec 2025',
     location: 'New York, NY',
   },
-  {
-    company: 'two19',
-    role: 'Product Fellow',
-    period: 'Jul 2025 — Aug 2025',
-    location: 'New York, NY',
-  },
+
 ] as const;
 
 export const education = [
   {
     school: 'New York University',
     degree: 'M.S. Technology Management',
-    detail: 'GPA 3.7 · Sep 2024 — May 2026',
+    detail: 'GPA 3.75 · Sep 2024 — May 2026',
   },
   {
     school: 'SRM Institute of Science and Technology',
