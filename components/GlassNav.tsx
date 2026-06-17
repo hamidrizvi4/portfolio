@@ -77,7 +77,7 @@ const ASK_ICON = (
   </svg>
 );
 
-const ALL_IDS = [...TABS.map((t) => t.id), 'ask'];
+const ALL_IDS = ['hero', 'metrics', 'work', 'ask', 'off-duty', 'contact'];
 
 export default function GlassNav() {
   const [activeId, setActiveId] = useState('hero');
