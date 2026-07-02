@@ -26,7 +26,7 @@ export const profile = {
 
   // The "about" paragraph, three flavors based on role-switcher
   bio: {
-    pm: "AI Product Manager who prototypes before writing the spec. At LexTrack AI, a failing pure-LLM prototype, 4x slower and hallucinating on required fields, forced the hybrid architecture that cut onboarding from 30 minutes to 5. CS undergrad, NYU grad student, CSPO and CSM certified. I don't write specs for things I haven't tested: the PRD the engineering team gets on day one is already grounded in what's actually possible.",
+    pm: "As an AI Product Manager with a CS background, I don't write specs for things I haven't tested. I build the prototype before I write the PRD so that engineering has a roadmap grounded in technical reality. When a pure-LLM prototype at LexTrack AI was hallucinating and lagging, this hands-on approach allowed me to pivot to a hybrid architecture quickly, ultimately cutting user onboarding from 30 minutes to 5. Backed by a Master's from NYU, a Bachelor's in Computer Science, and CSPO/CSM certifications, I sit directly at the intersection of product vision and engineering execution.",
     engineer: "AI/ML engineer with a product instinct. Built production RAG systems and TypeScript microservices at LexTrack AI through May 2026. I obsess over the boring stuff that actually matters: latency budgets, cost per query, and the 99.5% uptime that keeps users from rage-quitting.",
     associate: "Product associate who prototypes before writing the spec. CS undergrad, NYU, CSPO and CSM certified. I drive zero-to-one work by getting close to users, the data, and the model — then turn what I learn into roadmaps that actually ship.",
   },
