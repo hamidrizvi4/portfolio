@@ -52,9 +52,9 @@ The single file to edit for content is **`lib/personal-data.ts`** — metrics, c
 
 ## Design
 
-**Aesthetic:** Editorial dark — warm off-black `#0F0E0C`, paper `#F4F1EA`, single vermilion accent `#FF4A1C`.
+**Aesthetic:** Graphite Mono — pure white `#FFFFFF`, near-black graphite accent `#171717`, red spot-color `#DC2626`.
 
-**Typography:** Fraunces (display, optical-sized) · Inter (body) · JetBrains Mono (UI labels)
+**Typography:** DM Sans (display, UI, and long-form) · IBM Plex Mono (labels)
 
 **Key technical decisions:**
 

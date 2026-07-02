@@ -1,32 +1,16 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Inter, JetBrains_Mono } from 'next/font/google';
+import AppShell from '@/components/chrome/AppShell';
 import './globals.css';
 
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  axes: ['opsz', 'SOFT'],
-  variable: '--font-display',
-  display: 'swap',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  variable: '--font-mono',
-  display: 'swap',
-});
+// Fonts are Jira's own system-font stack, declared directly as CSS
+// variables in globals.css — no webfont download, matching what Jira
+// Cloud itself renders.
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://hamidrizvi.com'),
   title: 'Hamid Rizvi — AI Product Manager',
   description:
-    "AI Product Manager turning AI capabilities into shipped products. NYU Stern '26. Currently building production RAG at LexTrack AI.",
+    "AI Product Manager who prototypes before writing the spec. NYU '26 — shipped production RAG and 0-to-1 AI products at LexTrack AI. Open to full-time PM roles.",
   authors: [{ name: 'Hamid Rizvi' }],
   keywords: [
     'AI Product Manager',
@@ -41,7 +25,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Hamid Rizvi — AI Product Manager',
-    description: 'Turning AI capabilities into shipped products. Available now.',
+    description: "I prototype before I write the spec. Open to full-time PM roles, available now.",
     type: 'website',
     locale: 'en_US',
     siteName: 'Hamid Rizvi',
@@ -49,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Hamid Rizvi — AI Product Manager',
-    description: 'Turning AI capabilities into shipped products. Available now.',
+    description: "I prototype before I write the spec. Open to full-time PM roles, available now.",
   },
   robots: {
     index: true,
@@ -60,7 +44,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#F8F5EF',
+  themeColor: '#0c66e4',
 };
 
 export default function RootLayout({
@@ -69,11 +53,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable}`}
-    >
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }
