@@ -11,6 +11,20 @@ const nextConfig = {
   experimental: {
     typedRoutes: false,
   },
+
+  // The deep-dive narrative pages moved from /work/[slug] to
+  // /projects/[slug]/narrative (now a tab inside the project space
+  // instead of a disconnected page). Old links — including ones already
+  // shared in job applications — keep working.
+  async redirects() {
+    return [
+      {
+        source: '/work/:slug',
+        destination: '/projects/:slug/narrative',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

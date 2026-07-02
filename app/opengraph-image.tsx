@@ -18,26 +18,26 @@ export default function Image() {
     (
       <div
         style={{
-          background: '#141310',
+          background: '#ffffff',
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '64px 80px',
-          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontFamily: 'system-ui, sans-serif',
         }}
       >
         {/* ── TOP STRIP ── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 8, height: 8, borderRadius: 4, background: '#FF4A1C' }} />
+            <div style={{ width: 8, height: 8, borderRadius: 4, background: '#0c66e4' }} />
             <span
               style={{
                 fontFamily: 'monospace',
                 fontSize: 13,
                 letterSpacing: '0.18em',
-                color: '#8A847A',
+                color: '#737373',
                 textTransform: 'uppercase',
               }}
             >
@@ -49,11 +49,11 @@ export default function Image() {
               fontFamily: 'monospace',
               fontSize: 13,
               letterSpacing: '0.12em',
-              color: '#5C5953',
+              color: '#a3a3a3',
               textTransform: 'uppercase',
             }}
           >
-            NYU STERN ′26
+            NYU ′26
           </span>
         </div>
 
@@ -62,9 +62,8 @@ export default function Image() {
           <div
             style={{
               fontSize: 104,
-              fontStyle: 'italic',
-              fontWeight: 300,
-              color: '#F4F1EA',
+              fontWeight: 800,
+              color: '#172b4d',
               lineHeight: 0.92,
               letterSpacing: '-0.04em',
             }}
@@ -74,12 +73,11 @@ export default function Image() {
           <div
             style={{
               fontSize: 26,
-              fontStyle: 'italic',
-              color: '#8A847A',
+              color: '#737373',
               letterSpacing: '-0.01em',
             }}
           >
-            Turning AI capabilities into shipped products.
+            I prototype before I write the spec.
           </div>
         </div>
 
@@ -91,7 +89,7 @@ export default function Image() {
                 fontFamily: 'monospace',
                 fontSize: 12,
                 letterSpacing: '0.16em',
-                color: '#5C5953',
+                color: '#a3a3a3',
                 textTransform: 'uppercase',
               }}
             >
@@ -102,9 +100,8 @@ export default function Image() {
                 style={{
                   fontFamily: 'monospace',
                   fontSize: 80,
-                  fontWeight: 300,
-                  fontStyle: 'italic',
-                  color: '#FF4A1C',
+                  fontWeight: 700,
+                  color: '#0c66e4',
                   lineHeight: 1,
                   letterSpacing: '-0.03em',
                 }}
@@ -114,8 +111,7 @@ export default function Image() {
               <span
                 style={{
                   fontSize: 22,
-                  fontStyle: 'italic',
-                  color: '#D9D5CB',
+                  color: '#404040',
                   letterSpacing: '-0.01em',
                 }}
               >
@@ -125,13 +121,13 @@ export default function Image() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
-            <div style={{ width: 40, height: 2, background: '#FF4A1C' }} />
+            <div style={{ width: 40, height: 2, background: '#0c66e4' }} />
             <span
               style={{
                 fontFamily: 'monospace',
                 fontSize: 12,
                 letterSpacing: '0.14em',
-                color: '#5C5953',
+                color: '#a3a3a3',
                 textTransform: 'uppercase',
               }}
             >

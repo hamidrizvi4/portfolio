@@ -1,18 +1,7 @@
-/**
- * app/work/[slug]/page.tsx
- *
- * Deep case study pages — /work/lextrack, /work/quadtax.
- *
- * Statically generated from lib/deep-dives.ts. Each page is a long-form
- * decision narrative (context → role → hard decisions → outcomes → retro)
- * that the homepage chapters link to and that can be shared directly in
- * job applications.
- */
-
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import DeepDiveArticle from '@/components/DeepDiveArticle';
 import { deepDives, getDeepDive } from '@/lib/deep-dives';
+import DeepDiveArticle from '@/components/DeepDiveArticle';
 
 interface PageProps {
   params: { slug: string };
@@ -25,7 +14,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: PageProps): Metadata {
   const dive = getDeepDive(params.slug);
   if (!dive) return {};
-  const title = `${dive.title} — Deep case study · Hamid Rizvi`;
+  const title = `${dive.title} — Full decision narrative · Hamid Rizvi`;
   return {
     title,
     description: dive.subtitle,
@@ -37,13 +26,9 @@ export function generateMetadata({ params }: PageProps): Metadata {
   };
 }
 
-export default function DeepDivePage({ params }: PageProps) {
+export default function ProjectNarrativePage({ params }: PageProps) {
   const dive = getDeepDive(params.slug);
   if (!dive) notFound();
 
-  return (
-    <main>
-      <DeepDiveArticle dive={dive} />
-    </main>
-  );
+  return <DeepDiveArticle dive={dive} />;
 }

@@ -1,46 +1,79 @@
+'use client';
+
 /**
  * app/page.tsx
  *
- * The root page. Renders the six sections of the portfolio in order:
- *   01 — Hero
- *   02 — Metrics wall
- *   03 — Case studies (scrollytelling)
- *   04 — Ask Hamid (live Gemini chat)
- *   05 — Off-duty (photos, chess, case study tracker)
- *   06 — Contact + colophon
- *
- * Each section is a self-contained client component with its own animations,
- * state, and styles (via styled-jsx). They share design tokens through the
- * CSS variables defined in app/globals.css.
- *
- * GlassNav is the floating liquid-glass tab bar pinned to the bottom of the
- * viewport — one tab per section, scroll-spy highlights the active one.
+ * The home dashboard — styled after Jira's Default Dashboard: a grid of
+ * widgets (Introduction, Assigned to me, Projects, Activity stream)
+ * instead of a single scrolling page. Chrome (TopBar/Sidebar) is
+ * supplied globally by AppShell in app/layout.tsx.
  */
 
-import HeroSection from '@/components/HeroSection';
-import MetricsWall from '@/components/MetricsWall';
-import SkillsStrip from '@/components/SkillsStrip';
-import CaseStudyScrollytell from '@/components/CaseStudyScrollytell';
-import AskHamidChat from '@/components/AskHamidChat';
-import OffDutySection from '@/components/OffDutySection';
-import ExperienceTimeline from '@/components/ExperienceTimeline';
-import TestimonialStrip from '@/components/TestimonialStrip';
-import ContactSection from '@/components/ContactSection';
-import GlassNav from '@/components/GlassNav';
+import IntroWidget from '@/components/dashboard/IntroWidget';
+import StatsWidget from '@/components/dashboard/StatsWidget';
+import ProjectsWidget from '@/components/dashboard/ProjectsWidget';
+import ActivityWidget from '@/components/dashboard/ActivityWidget';
 
 export default function HomePage() {
   return (
-    <main>
-      <HeroSection />
-      <MetricsWall />
-      <SkillsStrip />
-      <CaseStudyScrollytell />
-      <AskHamidChat />
-      <OffDutySection />
-      <ExperienceTimeline />
-      <TestimonialStrip />
-      <ContactSection />
-      <GlassNav />
-    </main>
+    <div className="dashboard">
+      <header className="dashboard__header">
+        <p className="dashboard__eyebrow">Dashboards / Default dashboard</p>
+        <h1 className="dashboard__title">Hamid Rizvi's overview</h1>
+      </header>
+
+      <div className="dashboard__grid">
+        <div className="dashboard__col dashboard__col--main">
+          <div className="stagger-in"><IntroWidget /></div>
+          <div className="stagger-in"><ProjectsWidget /></div>
+        </div>
+        <div className="dashboard__col dashboard__col--side">
+          <div className="stagger-in"><StatsWidget /></div>
+          <div className="stagger-in"><ActivityWidget /></div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .dashboard {
+          padding: 1.75rem clamp(1.25rem, 3vw, 2.5rem) 4rem;
+          max-width: 1320px;
+          margin: 0 auto;
+        }
+        .dashboard__header {
+          margin-bottom: 1.5rem;
+        }
+        .dashboard__eyebrow {
+          font-family: var(--font-mono);
+          font-size: 0.7rem;
+          color: var(--pulp);
+          margin: 0 0 0.4rem;
+        }
+        .dashboard__title {
+          font-family: var(--font-display);
+          font-size: 1.7rem;
+          font-weight: 800;
+          color: var(--paper);
+          margin: 0;
+        }
+
+        .dashboard__grid {
+          display: grid;
+          grid-template-columns: 1.6fr 1fr;
+          gap: 1.25rem;
+          align-items: start;
+        }
+        .dashboard__col {
+          display: flex;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+
+        @media (max-width: 900px) {
+          .dashboard__grid {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+    </div>
   );
 }

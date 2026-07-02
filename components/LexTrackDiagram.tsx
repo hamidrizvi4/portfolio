@@ -6,20 +6,20 @@
  */
 export default function LexTrackDiagram() {
   const mono: React.CSSProperties = { fontFamily: 'var(--font-mono)' };
-  const accent = '#FF4A1C';
-  const border = '#C8C4BA';
-  const fill   = '#EDE9E0';
-  const text   = '#6B6560';
-  const dim    = '#A09890';
-  const line   = '#A09890';
+  const accent = '#0C66E4';
+  const border = '#C1C7D0';
+  const fill   = '#F7F8F9';
+  const text   = '#44546F';
+  const dim    = '#8590A2';
+  const line   = '#8590A2';
 
   return (
     <div style={{ overflowX: 'auto', marginBottom: '2.5rem' }}>
       <svg
-        viewBox="0 0 540 710"
+        viewBox="0 0 560 710"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ width: '100%', maxWidth: 540, display: 'block', margin: '0 auto' }}
+        style={{ width: '100%', maxWidth: 560, display: 'block', margin: '0 auto' }}
         role="img"
         aria-label="LexTrack hybrid AI architecture diagram"
       >
@@ -103,7 +103,7 @@ export default function LexTrackDiagram() {
         <text x="430" y="394" textAnchor="middle" fontSize="8.5" fill={accent} letterSpacing="0.8" style={mono}>
           3-LAYER FALLBACK
         </text>
-        <line x1="326" y1="401" x2="534" y2="401" stroke="rgba(255,74,28,0.25)" strokeWidth="1" />
+        <line x1="326" y1="401" x2="534" y2="401" stroke="rgba(12,102,228,0.25)" strokeWidth="1" />
         <text x="332" y="421" fontSize="10.5" fill={text}>1 → Primary LLM call</text>
         <text x="332" y="439" fontSize="10.5" fill={text}>2 → Cached response</text>
         <text x="332" y="457" fontSize="10.5" fill={text}>3 → Deterministic default</text>

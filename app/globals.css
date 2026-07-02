@@ -1,37 +1,73 @@
 /* ============================================
-   DESIGN TOKENS — Editorial Light
+   DESIGN TOKENS — Light mode (default)
+   Real Jira Cloud palette (Atlassian Design System)
+   Primary:   #0C66E4  Jira blue (B400)
+   Secondary: #172B4D  Jira dark navy (N800)
+   Fonts:     system font stack (Jira's own UI font stack)
+   Radius:    matches Jira's 3-4px chrome, buttons/nav pills unchanged
    ============================================ */
 :root {
-  /* Palette — warm, restrained, editorial */
-  --ink: #F8F5EF;
-  --ink-2: #EDE9E0;
-  --ink-3: #E4E0D6;
-  --paper: #0F0E0C;
-  --paper-dim: #2C2A26;
-  --pulp: #6B6560;
-  --pulp-dim: #A09890;
-  --rule: rgba(15, 14, 12, 0.07);
-  --rule-strong: rgba(15, 14, 12, 0.13);
+  /* ── Backgrounds ── */
+  --ink:    #ffffff;    /* page background — pure white */
+  --ink-2:  #f7f8f9;    /* Jira "Neutral subtle" background */
+  --ink-3:  #f1f2f4;    /* deeper alternate section / card surface */
 
-  /* The one accent — vermilion. Use sparingly. */
-  --accent: #FF4A1C;
-  --accent-glow: rgba(255, 74, 28, 0.18);
+  /* ── Text ── */
+  --paper:     #172b4d;  /* Jira primary text — N800 dark navy */
+  --paper-dim: #44546f;  /* Jira secondary text — N500 */
+  --pulp:      #626f86;  /* Jira tertiary / muted label — N400 */
+  --pulp-dim:  #8590a2;  /* Jira very muted / placeholder — N300 */
 
-  /* Motion vocabulary — from Emil's design-eng principles */
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  /* ── Borders & rules ── */
+  --rule:        rgba(23, 43, 77, 0.08);
+  --rule-strong: rgba(23, 43, 77, 0.14);
+
+  /* ── Primary accent — Jira blue ── */
+  --accent:      #0c66e4;
+  --accent-deep: #0055cc;   /* darker shade for gradients / pressed states */
+  --accent-glow: rgba(12, 102, 228, 0.20);
+
+  /* ── Secondary — Jira dark navy (sparing spot-color) ── */
+  --secondary: #172b4d;
+
+  /* ── Jira-chrome tokens — sidebar/topbar/status colors ──
+     Matches real Jira Cloud: white topbar, light-gray sidebar,
+     blue brand accent, and the same status-category palette Jira
+     itself uses so Done/In Progress/To Do stay instantly legible. */
+  --chrome-topbar:  #ffffff;
+  --chrome-sidebar: #f7f8f9;
+  --chrome-border:  rgba(23, 43, 77, 0.10);
+  --chrome-hover:   rgba(23, 43, 77, 0.045);
+
+  --status-done-bg:     #dcfff1;
+  --status-done-fg:     #1f845a;
+  --status-progress-bg: #e9f2ff;
+  --status-progress-fg: #0c66e4;
+  --status-todo-bg:     #dcdfe4;
+  --status-todo-fg:     #44546f;
+
+  /* ── Fonts — Jira's own UI stack, no webfont download ── */
+  --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-serif:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* ── Motion ── */
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
-  /* Durations — keep UI under 300ms */
-  --dur-fast: 160ms;
-  --dur-base: 220ms;
-  --dur-slow: 320ms;
-  --dur-reveal: 800ms; /* Reserved for hero/section reveals only */
+  /* ── Durations — keep UI under 300ms ── */
+  --dur-fast:   160ms;
+  --dur-base:   220ms;
+  --dur-slow:   320ms;
+  --dur-reveal: 800ms;
 
-  /* Layout */
+  /* ── Layout ── */
   --gutter: clamp(1.5rem, 4vw, 4rem);
-  --max-w: 1440px;
+  --max-w:  1440px;
 }
+
 
 /* ============================================
    RESET — opinionated, minimal
@@ -55,17 +91,17 @@ body {
   overflow-x: hidden;
   background: var(--ink);
   background-image:
-    radial-gradient(ellipse at top, rgba(255, 74, 28, 0.05), transparent 60%),
-    radial-gradient(ellipse at bottom, rgba(15, 14, 12, 0.02), transparent 50%);
+    radial-gradient(ellipse at top, rgba(12, 102, 228, 0.06), transparent 60%),
+    radial-gradient(ellipse at bottom, rgba(23, 43, 77, 0.04), transparent 50%);
 }
 
-/* Custom selection — vermilion ink */
+/* Selection — primary ink */
 ::selection {
   background: var(--accent);
-  color: var(--ink);
+  color: #ffffff;
 }
 
-/* Hide scrollbar in WebKit, keep functional */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 4px; }
@@ -73,21 +109,28 @@ body {
 
 /* ============================================
    TYPOGRAPHY SCALE
+   Font roles — "Graphite Mono" runs a single DM Sans family across
+   display/sans/serif for a uniform monochrome system; only the mono
+   role stays distinct, for eyebrows/labels.
+   --font-display   DM Sans       → hero headings, section titles, metric numerals
+   --font-sans      DM Sans       → UI text: nav, buttons, labels, metrics
+   --font-mono      IBM Plex Mono → eyebrows, numbers, code, stats
+   --font-serif     DM Sans       → long-form reading: principle bodies, deep-dive prose
    ============================================ */
 .display {
   font-family: var(--font-display);
-  font-weight: 300;
-  letter-spacing: -0.04em;
-  line-height: 0.92;
-  font-variation-settings: "opsz" 144, "SOFT" 0;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 0.96;
 }
 
 .display-xl {
   font-size: clamp(3.5rem, 12vw, 11rem);
-  font-weight: 300;
-  font-style: italic; /* Fraunces italic at large sizes is unforgettable */
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
+/* Eyebrow labels — mono, all-caps, spaced */
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -97,7 +140,16 @@ body {
   color: var(--pulp);
 }
 
+/* Body reading text — DM Sans for comfortable long-form reading */
 .body {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.72;
+  color: var(--paper-dim);
+}
+
+/* UI prose — DM Sans for short descriptive copy */
+.ui-text {
   font-family: var(--font-sans);
   font-size: 1rem;
   line-height: 1.6;
@@ -133,7 +185,7 @@ button {
   outline-offset: 4px;
 }
 
-/* Reduce motion for accessibility */
+/* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -143,11 +195,28 @@ button {
   }
 }
 
-/* Touch device — disable hover transforms */
 @media (hover: none) and (pointer: coarse) {
   .magnetic, .hover-lift {
     transition: none;
   }
+}
+
+/* ============================================
+   SHARED PAGE SHELL — server-safe wrapper for
+   simple dynamic routes that can't use styled-jsx
+   (they export generateStaticParams, which requires
+   staying a Server Component)
+   ============================================ */
+.page-shell {
+  padding: 1.5rem clamp(1.25rem, 3vw, 2.5rem) 4rem;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+.page-shell__intro {
+  font-size: 0.88rem;
+  color: var(--pulp);
+  margin: 0 0 1.25rem;
+  max-width: 70ch;
 }
 
 /* ============================================
