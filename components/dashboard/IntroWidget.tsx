@@ -61,7 +61,7 @@ export default function IntroWidget() {
         </div>
         <div className="intro__text">
           <h1 className="intro__name">{profile.name}</h1>
-          <p className="intro__tagline">Five AI products shipped. Every claim on this site traces back to one of them.</p>
+          <p className="intro__tagline">AI Product Manager who builds the prototype before the PRD exists, and stays close enough to the code to keep both honest.</p>
           <span className="intro__status">
             <span className="intro__status-dot" aria-hidden="true" />
             {profile.availability}
