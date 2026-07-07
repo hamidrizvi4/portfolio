@@ -35,7 +35,6 @@ export default function BacklogList({ epics }: { epics: JiraEpic[] }) {
             <div className={`epic__body-wrap ${open ? 'epic__body-wrap--open' : ''}`}>
               <div className="epic__body-clip">
                 <div className="epic__body">
-                  <p className="epic__summary">{epic.summary}</p>
                   <ul className="epic__stories">
                     {epic.stories.map((story) => (
                       <li key={story.key} className="story">
@@ -125,17 +124,10 @@ export default function BacklogList({ epics }: { epics: JiraEpic[] }) {
           padding: 0 1.1rem 1.1rem calc(1.1rem + 14px + 0.75rem);
           border-top: 1px solid var(--chrome-border);
         }
-        .epic__summary {
-          font-size: 0.85rem;
-          color: var(--paper-dim);
-          line-height: 1.55;
-          margin: 0.85rem 0 1rem;
-        }
-
         .epic__stories {
           list-style: none;
           padding: 0;
-          margin: 0;
+          margin: 0.85rem 0 0;
           display: flex;
           flex-direction: column;
           gap: 0.6rem;

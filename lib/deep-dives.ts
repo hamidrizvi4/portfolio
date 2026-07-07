@@ -449,8 +449,8 @@ Merchant: "Describe your restaurant"
     title: 'Equiply Asset Intelligence',
     subtitle:
       'A hiring-tournament brief asked for two enriched CSV columns. We shipped a client-side data pipeline and a full asset-intelligence dashboard, and still exported the exact clean CSV the minimum tier asked for.',
-    role: 'Hiring Tournament · Optimal Tier Submission',
-    period: 'Equiply hiring tournament',
+    role: 'Optimal Tier submission',
+    period: 'Hiring tournament',
     stack: ['React', 'Vite', 'Tailwind CSS', 'PapaParse', 'Custom SVG charts'],
     context: [
       'Hospitals struggle with dirty, incomplete equipment data. Equiply\'s hiring tournament handed contestants a raw CSV of hospital equipment records, manufacturer, model, and serial number, and asked for two enriched fields: manufactured date and device type. No external API or database was provided. How you got there was up to you.',
@@ -501,7 +501,11 @@ Merchant: "Describe your restaurant"
       { stat: '100%', label: 'Client-side, equipment data never leaves the browser' },
       { stat: '0', label: 'External APIs or charting libraries used' },
     ],
-    retro: [],
+    retro: [
+      'Calibrate the confidence scores against a hand-labeled sample. 52% high confidence is the heuristic grading its own homework; verifying even 50 rows by hand would turn that into a measured precision number, and probably move it.',
+      'The lifespan thresholds behind Good, Warning, and Critical came from our own research, not from a hospital biomedical team. Before anyone plans a replacement budget on this dashboard, those thresholds need validation from the people who actually maintain the machines.',
+      'No real operations user ever navigated the dashboard. The KPI hierarchy reflects my read of the brief, and the first session with an actual equipment manager would almost certainly reorder it.',
+    ],
     cta: {
       type: 'github',
       label: 'Check out the GitHub repo',

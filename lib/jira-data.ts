@@ -23,7 +23,6 @@ export interface JiraStory {
 export interface JiraEpic {
   key: string;
   title: string;
-  summary: string;
   status: IssueStatus;
   stories: JiraStory[];
 }
@@ -80,7 +79,6 @@ function decisionToEpic(decision: Decision, epicIndex: number, prefix: string): 
   return {
     key: epicKey,
     title: decision.title,
-    summary: decision.setup,
     status: 'Done',
     stories: storyDefs.map((s, i) => ({
       key: `${prefix}-${epicIndex * 5 + 2 + i}`,

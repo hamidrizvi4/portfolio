@@ -218,7 +218,6 @@ export default function CreateIssueModal({ open, onClose }: CreateIssueModalProp
             transform: translateY(0) scale(1);
           }
         }
-        }
         .modal__header {
           display: flex;
           align-items: center;
