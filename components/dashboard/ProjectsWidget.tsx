@@ -16,14 +16,16 @@ export default function ProjectsWidget() {
       <div className="projects__grid">
         {projectSpaces.map((p) => {
           const storyCount = p.epics.reduce((n, e) => n + e.stories.length, 0);
-          const lastPhase = p.timeline[p.timeline.length - 1];
+          // A project with phases still open is In Progress, not To Do — the last
+          // phase alone made shipped-and-active QuadTax read as unstarted.
+          const status = p.timeline.every((ph) => ph.status === 'Done') ? 'Done' : 'In Progress';
           return (
             <Link key={p.slug} href={`/projects/${p.slug}`} className="project-card">
               <div className="project-card__top">
                 <span className="project-card__mark" aria-hidden="true">
                   <ProjectIcon slug={p.slug} keyPrefix={p.keyPrefix} size={26} />
                 </span>
-                {lastPhase && <StatusChip status={lastPhase.status} />}
+                <StatusChip status={status} />
               </div>
               <h3 className="project-card__title">{p.title}</h3>
               <p className="project-card__hero">{p.hero}</p>

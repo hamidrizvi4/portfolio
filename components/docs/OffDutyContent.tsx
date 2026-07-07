@@ -40,8 +40,11 @@ const NAJDORF_HIGHLIGHT = { row: 2, col: 0 };
 const CASE_STUDY_COUNT = 47;
 const TODAYS_CASE = 'Design a feature to increase weekday Spotify usage among users aged 25-34.';
 
+// Starts at the real value so the number is never a permanent 0 when the
+// IntersectionObserver doesn't fire (print, PDF export, some in-app browsers);
+// the 0-to-target animation only plays once the block scrolls into view.
 function useCountUp(target: number, active: boolean, duration = 1200) {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(target);
   useEffect(() => {
     if (!active) return;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
