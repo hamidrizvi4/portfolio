@@ -10,7 +10,7 @@ export default function ProjectsWidget() {
     <section className="widget projects" aria-label="Projects">
       <header className="widget__header">
         <p className="widget__eyebrow">Projects</p>
-        <p className="widget__subhead">Five shipped products, each with a Summary, Backlog, Timeline, and full decision narrative</p>
+        <p className="widget__subhead">Six shipped products, each with a Summary, Backlog, Timeline, and full decision narrative</p>
       </header>
 
       <div className="projects__grid">

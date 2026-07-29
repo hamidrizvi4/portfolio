@@ -511,6 +511,103 @@ Merchant: "Describe your restaurant"
       label: 'Check out the GitHub repo',
       href: 'https://github.com/hamidrizvi4/equiply-intelligence',
     },
+    nextSlug: 'triage',
+  },
+
+  // ==========================================================
+  // CLAUDE SUPPORT TRIAGE AGENT
+  // ==========================================================
+  {
+    slug: 'triage',
+    index: '06',
+    title: 'Claude Support Triage Agent',
+    subtitle:
+      'An agent that triages developer support tickets against real documentation, routes on stakes rather than raw confidence, then goes through a 7-point external code review the way a senior engineer works one: verify everything, fix what the review found, and fix what it missed too.',
+    role: 'Independent Project · Solo Build & Audit',
+    period: 'Jul 2026',
+    stack: ['Next.js', 'TypeScript', 'Supabase', 'pgvector', 'OpenRouter'],
+    context: [
+      'Independent portfolio project, not affiliated with or endorsed by Anthropic. Built entirely on Anthropic\'s public developer documentation, no private data.',
+      'Every API company faces the same support-ops problem: a large tier of repetitive, doc-answerable tickets, rate limits, pricing, migration steps, sits next to a smaller tier of genuinely sensitive tickets, billing disputes, security reports, enterprise sales, bug reports, that need a human. Most teams give every ticket roughly equal attention regardless of which tier it is in. I used Anthropic\'s public developer docs as a real, richly structured grounding corpus to build a triage agent against, not a toy dataset.',
+      'The brief I set myself: build an agent that takes real business context, reasons through a multi-step workflow, uses tools including at least one live external system, generates a structured and citable output, and routes intelligently to a human, with a full audit trail of why. That version shipped in three days. What follows is what happened next.',
+    ],
+    myRole: [
+      'Solo build and solo audit. I designed the agent loop and the routing engine, built the ingestion pipeline against real documentation, and shipped the review queue and reporting dashboard on top.',
+      'Once the core product was live, I ran the repo through a 7-point external code review and treated the findings the way I\'d want a senior engineer to treat feedback on my own code: verify everything independently against the live system before touching anything, and don\'t assume the review\'s scope was complete. In three of the seven areas, the actual problem was larger than what was reported.',
+    ],
+    architectureDiagram: `\
+docs.claude.com ────┐
+support.claude.com ─┼──▶ ingestion: chunk + embed ──▶ Supabase / pgvector
+status.claude.com ──┘                                    RLS enabled, default-deny
+
+ticket ──▶ agent orchestrator: tool-calling loop ──▶ routing engine
+                     │                                     │
+                     ▼                                     ├──▶ auto-resolve
+              tool_calls: audit trail                      └──▶ human review queue`,
+    decisions: [
+      {
+        title: 'The routing engine decides, not the model',
+        setup:
+          'With five tools and a forced structured final output, the obvious design is to let the model itself decide when it is confident enough to auto-resolve a ticket. Confidence is right there in the output, so why not use it directly.',
+        tradeoff:
+          'Model confidence is a probabilistic self-report, and a single wrong autonomous answer on a billing or security ticket costs far more than a slow answer on a rate-limit question. Letting the model gate its own escalation is simpler to build, but it puts a probability distribution in charge of a decision that should be categorical.',
+        call:
+          'A rules-based routing engine sits outside the model and makes the final call. Billing, security, sales, and bug-report categories always escalate to a human, regardless of how confident the model claims to be. Everything else routes on a blended score, 0.6 times retrieval score plus 0.4 times self-certainty, against a 0.8 threshold. The asymmetric-risk categories get a hard rule, not a probability.',
+        result:
+          'Every ticket now carries a category-based override or a measured threshold decision, and every tool call behind that decision is logged. The confidence formula itself had no empirical validation at first, a gap the audit phase below closes.',
+      },
+      {
+        title: 'Verify the review, do not just implement it',
+        setup:
+          'An external code review flagged Row-Level Security as disabled and named thin test coverage on a function that had already caused two real dashboard-corrupting bugs. The fast path is to patch exactly what is named and move on.',
+        tradeoff:
+          'Trusting a review\'s scope is faster. Verifying independently against the live system is slower and sometimes finds the review understated the problem, which is only useful if you actually do it rather than assume the report was complete.',
+        call:
+          'I ran Supabase\'s own advisor tooling against the live project instead of taking the finding on faith, and confirmed RLS disabled at ERROR level on all six tables, plus a WARN on a mutable function search path. Reading the migration history explained why: an earlier, unrelated fix had granted the anon and authenticated roles full read and write on every table as a side effect. On the test-coverage finding, trying to actually write the tests surfaced the real cause: the file was gated by an import that throws unconditionally outside a bundler, making it structurally untestable, not just untested.',
+        result:
+          'Fixed the security exposure with two independent layers, revoked the unintended grants and enabled RLS default-deny, then verified with a second advisor scan showing both the ERROR and the WARN gone. Extracted the untestable logic into a pure module with no server-only gate and wrote real coverage against it, including the specific ordering bug that had caused the prior corruption. Four test suites now run as one command.',
+      },
+      {
+        title: 'Disclose the free-tier number instead of burying it',
+        setup:
+          'The free-tier run against a real 40-ticket set came back 50% incomplete. That is a true, disclosed finding, and also a number that reads as "the demo does not work" to someone skimming.',
+        tradeoff:
+          'Reframe the story, quietly rerun until a better number appears, or spend real money on a clean paid run. Every option is defensible, and picking one alone and presenting it as the only option would have hidden the actual tradeoff the project exists to demonstrate.',
+        call:
+          'Surfaced it as an explicit choice rather than picking the flattering one silently, then spent a small budget, about $10, on an Exacto-routed paid rerun of the identical ticket set. Both configurations stay in the write-up.',
+        result:
+          'Free tier: 8 resolved, 12 escalated, 20 incomplete, $0. Paid: 15 resolved, 22 escalated, 3 incomplete, $0.25. Both rows verified independently, the free-tier figure recomputed from the database against the dashboard\'s own classification rules, the cost figure pulled from OpenRouter\'s billing API rather than estimated.',
+      },
+      {
+        title: 'Route the judgment calls, not just the tickets',
+        setup:
+          'Three separate moments came up where the easy move was to decide something alone and make the story tidier: squash the git history into a cleaner narrative, pick whichever framing of the incomplete-rate number looked best, and quietly smooth over a git discrepancy where a single commit covered what should have been roughly a dozen files with no record of the session that produced it.',
+        tradeoff:
+          'Every one of those calls would have been easy to make alone, and nobody reviewing the finished product would have known. But the entire thesis of this agent is that some decisions get routed to a human because the output alone cannot tell you whether skipping that step was safe.',
+        call:
+          'Left the git history alone rather than rewriting published commits. Surfaced the incomplete-rate number as a three-way choice instead of silently picking the best-looking one. Reported the commit discrepancy plainly and asked before proceeding rather than guessing at an explanation.',
+        result:
+          'One of those moments got a decision, the $10 paid rerun, made as an explicit opt-in. The other two got left alone, on the record. Both outcomes are visible in the repo, which is the same audit trail the product itself produces for every ticket it routes.',
+      },
+    ],
+    outcomes: [
+      { stat: '7', label: 'External review findings, 3 of 7 larger than reported once independently verified' },
+      { stat: '2', label: 'Independent fix layers for a live pre-launch RLS security exposure' },
+      { stat: '4', label: 'Test suites added after extracting untestable logic into a pure module' },
+      { stat: '$0.25', label: 'Cost to cut the incomplete rate from 50% to 7.5% on the same 40-ticket set' },
+      { stat: '12', label: 'Verified bugs fixed across the build, the audit, and the paid rerun' },
+      { stat: '0', label: 'Unilateral rewrites of git history or silently cherry-picked numbers' },
+    ],
+    retro: [
+      'Raise the max-token limit and re-verify. One ticket in the paid rerun came back with truncated JSON, almost certainly the output ceiling cutting a long response mid-payload, a clear next fix rather than a mystery.',
+      'Turn the doc-gap signal into an actual feedback loop. Right now it surfaces on the dashboard as a list of low-retrieval tickets, and it should feed directly into documentation planning instead of waiting to be read.',
+      'The reviewer-overturn calibration metric is only meaningful at scale. At launch it reflected exactly one real human review, a single data point dressed up as a percentage, and it needs a real sample before anyone should trust it.',
+    ],
+    cta: {
+      type: 'github',
+      label: 'Check out the GitHub repo',
+      href: 'https://github.com/hamidrizvi4/claude-support-triage-agent',
+    },
     nextSlug: 'lextrack',
   },
 ];

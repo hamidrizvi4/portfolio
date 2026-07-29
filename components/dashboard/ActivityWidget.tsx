@@ -5,7 +5,7 @@ import StatusChip from '@/components/chrome/StatusChip';
 
 // Hand-ordered by real-world recency (most recent project work first),
 // same window precision as the résumé (no fabricated timestamps).
-const RECENCY_ORDER = ['quadtax', 'equiply', 'lextrack', 'analytics', 'squirrel'];
+const RECENCY_ORDER = ['triage', 'quadtax', 'equiply', 'lextrack', 'analytics', 'squirrel'];
 
 interface ActivityEntry {
   key: string;
