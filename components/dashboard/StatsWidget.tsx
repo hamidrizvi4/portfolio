@@ -7,7 +7,7 @@ export default function StatsWidget() {
     <section className="widget stats" aria-label="Assigned to me">
       <header className="widget__header">
         <p className="widget__eyebrow">Assigned to me</p>
-        <p className="widget__subhead">Headline numbers across five shipped projects</p>
+        <p className="widget__subhead">Headline numbers across six shipped projects</p>
       </header>
 
       <ul className="stats__list">

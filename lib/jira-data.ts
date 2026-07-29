@@ -65,6 +65,7 @@ const KEY_PREFIXES: Record<string, string> = {
   analytics: 'ANL',
   squirrel: 'SQL',
   equiply: 'EQP',
+  triage: 'TRI',
 };
 
 function decisionToEpic(decision: Decision, epicIndex: number, prefix: string): JiraEpic {
@@ -122,6 +123,12 @@ const TIMELINE_BY_SLUG: Record<string, TimelinePhase[]> = {
     { label: 'Brief scoping', window: 'Tournament', status: 'Done', startPct: 0, endPct: 0.25 },
     { label: 'Heuristic extraction pipeline', window: 'Tournament', status: 'Done', startPct: 0.25, endPct: 0.62 },
     { label: 'Dashboard & Optimal Tier submission', window: 'Tournament', status: 'Done', startPct: 0.62, endPct: 1 },
+  ],
+  triage: [
+    { label: 'Core agent build', window: 'Jul 2026', status: 'Done', startPct: 0, endPct: 0.35 },
+    { label: '7-point external code review', window: 'Jul 2026', status: 'Done', startPct: 0.35, endPct: 0.6 },
+    { label: 'Fixes verified against the live system', window: 'Jul 2026', status: 'Done', startPct: 0.6, endPct: 0.85 },
+    { label: 'Paid-model economics rerun', window: 'Jul 2026', status: 'Done', startPct: 0.85, endPct: 1 },
   ],
 };
 

@@ -6,9 +6,11 @@
  * Per-project brand marks, recreated as inline SVG from the reference
  * icons: LexTrack's red mic badge, Squirrel AI's white-squirrel-on-dark
  * mark, QuadTax's ghost-with-percent, and a flat-illustration-palette
- * donut chart for AI Purchase Analytics. Unknown slugs fall back to the
- * two-letter key chip so future projects render sensibly before they
- * get a mark.
+ * donut chart for AI Purchase Analytics. The Triage Agent mark is an
+ * original design, not a reference icon: a routing fork, standing in for
+ * the rules engine that decides auto-resolve versus human escalation.
+ * Unknown slugs fall back to the two-letter key chip so future projects
+ * render sensibly before they get a mark.
  */
 
 const RADIUS_RATIO = 0.22;
@@ -116,6 +118,22 @@ function AnalyticsMark({ size }: { size: number }) {
   );
 }
 
+function TriageMark({ size }: { size: number }) {
+  const r = size * RADIUS_RATIO;
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" aria-hidden="true">
+      <rect width="48" height="48" rx={r * (48 / size)} fill="#4338CA" />
+      {/* Routing fork: one line in, decision node, two lines out */}
+      <line x1="24" y1="9" x2="24" y2="20" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="24" cy="24" r="4" fill="#ffffff" />
+      <line x1="21" y1="27" x2="13" y2="36" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+      <line x1="27" y1="27" x2="35" y2="36" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="13" cy="38.5" r="2.6" fill="#ffffff" />
+      <path d="M31.5 36.5 L34.3 39.3 L39 33.5" fill="none" stroke="#ffffff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function ProjectIcon({
   slug,
   keyPrefix,
@@ -134,6 +152,8 @@ export default function ProjectIcon({
       return <QuadTaxMark size={size} />;
     case 'analytics':
       return <AnalyticsMark size={size} />;
+    case 'triage':
+      return <TriageMark size={size} />;
     default:
       return (
         <span

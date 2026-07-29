@@ -15,15 +15,15 @@ export default function CareerTimelinePage() {
     <DocPage
       eyebrow="Documentation / Career Timeline"
       title="Where I've been"
-      subtitle="Experience, education, certifications, and the skills behind all five projects."
+      subtitle="Experience, education, certifications, and the skills behind all six projects."
     >
       <section className="block">
         <h2 className="block__title">Work</h2>
         <p className="block__note">
-          One employer to date, LexTrack AI, intern then capstone PM. The other four projects on this
+          One employer to date, LexTrack AI, intern then capstone PM. The other five projects on this
           site were self-directed: QuadTax shipped with a 3-person team I led, Squirrel AI with a
-          2-person team, AI Purchase Analytics solo, and Equiply Asset Intelligence as a hiring
-          tournament submission.
+          2-person team, AI Purchase Analytics and the Claude Support Triage Agent solo, and Equiply
+          Asset Intelligence as a hiring tournament submission.
         </p>
         <ol className="timeline">
           {experience.map((item) => (

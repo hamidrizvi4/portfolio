@@ -171,11 +171,16 @@ export default function DeepDiveArticle({ dive }: { dive: DeepDive }) {
           gap: 1.25rem;
           align-items: start;
         }
+        /* min-width:0 — a grid child defaults to min-width:auto, so the wide
+           <pre> architecture diagram would size this whole column to its own
+           intrinsic width and push the page into horizontal scroll instead of
+           scrolling inside .narrative__diagram-wrap. */
         .narrative__main,
         .narrative__side {
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
+          min-width: 0;
         }
 
         .panel {

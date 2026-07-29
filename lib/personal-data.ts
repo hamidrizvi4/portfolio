@@ -82,7 +82,7 @@ export const metrics = [
 ] as const;
 
 // ============================================
-// CASE STUDIES — the five projects
+// CASE STUDIES — the six projects
 // ============================================
 export interface CaseStudy {
   id: string;
@@ -229,6 +229,30 @@ export const caseStudies: CaseStudy[] = [
       href: 'https://github.com/hamidrizvi4/equiply-intelligence',
     },
   },
+  {
+    id: 'triage',
+    index: '06',
+    title: 'Claude Support Triage Agent',
+    role: 'Independent Project · Solo Build & Audit',
+    period: 'Jul 2026',
+    stack: ['Next.js', 'TypeScript', 'Supabase', 'pgvector', 'OpenRouter'],
+    hero: 'A support agent that routes on stakes, not confidence, then survived its own audit.',
+    problem: 'Every API company faces the same support-ops problem. A large tier of repetitive, doc-answerable tickets sits next to a smaller tier of billing, security, and sales tickets where a wrong autonomous answer is expensive. Most teams give every ticket the same attention regardless of which tier it is in.',
+    build: 'An agent loop with five tools, grounded in real public developer documentation rather than a toy dataset. A rules-based routing engine, not the model itself, makes the final call: billing, security, sales, and bug-report tickets always escalate to a human regardless of model confidence, everything else routes on a blended confidence threshold. Every tool call is logged for a full audit trail, with a review queue, a ticket dashboard, and a doc-gap view that surfaces where the documentation itself is thin.',
+    impact: [
+      'Ran the shipped build through a 7-point external code review and worked it the way a senior engineer works one: verified every claim independently instead of trusting the write-up',
+      'Found and closed a live pre-launch security exposure: Row-Level Security disabled on all six tables, plus an unintended full-privilege grant to unauthenticated roles',
+      'Measured, not guessed, the free-to-paid model tradeoff: $0.25 across 40 tickets cut the incomplete rate from 50% to 7.5%',
+      'Fixed 12 verified bugs across the build, the audit, and the paid rerun, including a structural issue that made core logic untestable',
+    ],
+    accent: 'pulp',
+    deepDive: '/projects/triage/narrative',
+    cta: {
+      type: 'github',
+      label: 'Check out the GitHub repo',
+      href: 'https://github.com/hamidrizvi4/claude-support-triage-agent',
+    },
+  },
 ];
 
 // ============================================
@@ -311,6 +335,6 @@ export const testimonials = [
 export const skills = {
   ai: ['LLM Integration (GPT-4, Claude, Gemini)', 'RAG Systems', 'Prompt Engineering', 'Pydantic Structured Outputs', 'FastAPI', 'Multi-Agent Orchestration', 'Vector Databases', 'Model Evaluation', 'Cost Optimization'],
   product: ['0-to-1 Development', 'User Research', 'RICE Prioritization', 'Roadmapping', 'PRD Writing', 'Agile/Scrum (CSPO, CSM)', 'Jira', 'Figma', 'A/B Testing'],
-  engineering: ['Python', 'TypeScript', 'Next.js', 'React', 'Node.js', 'FastAPI', 'PostgreSQL', 'Docker', 'AWS', 'Azure', 'CI/CD'],
-  data: ['SQL', 'Pandas', 'NumPy', 'Cohort Analysis', 'Churn Modeling', 'OCR (Tesseract)', 'ETL Pipelines'],
+  engineering: ['Python', 'TypeScript', 'Next.js', 'React', 'Node.js', 'FastAPI', 'PostgreSQL', 'Supabase', 'Security Auditing', 'Docker', 'AWS', 'Azure', 'CI/CD'],
+  data: ['SQL', 'Pandas', 'NumPy', 'Cohort Analysis', 'Churn Modeling', 'OCR (Tesseract)', 'pgvector', 'ETL Pipelines'],
 } as const;
