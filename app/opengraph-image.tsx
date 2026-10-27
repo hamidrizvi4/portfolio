@@ -9,7 +9,7 @@
 
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Hamid Rizvi — AI Product Manager';
+export const alt = 'Hamid Rizvi — AI Engineer, Forward Deployed';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -41,7 +41,7 @@ export default function Image() {
                 textTransform: 'uppercase',
               }}
             >
-              AI PRODUCT MANAGER
+              AI ENGINEER · FORWARD DEPLOYED
             </span>
           </div>
           <span
@@ -77,7 +77,7 @@ export default function Image() {
               letterSpacing: '-0.01em',
             }}
           >
-            I prototype before I write the spec.
+            I deploy AI into messy workflows, and write down what broke.
           </div>
         </div>
 
@@ -131,7 +131,7 @@ export default function Image() {
                 textTransform: 'uppercase',
               }}
             >
-              LexTrack AI · QuadTax · NYC
+              LexTrack AI · ResidenceOS · NYC
             </span>
           </div>
         </div>

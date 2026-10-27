@@ -2,27 +2,25 @@
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
-  // styled-jsx works out of the box in Next.js — no extra config needed.
-  // Server actions / RSC are not used in this project; everything is
-  // client components + a single API route at /api/chat.
   reactStrictMode: true,
 
-  // Optional: enable typed routes for better DX
-  experimental: {
-    typedRoutes: false,
+  // lib/hamid-knowledge.md is imported as a raw string (lib/knowledge.ts),
+  // so the chat route and the hero read it without filesystem access at
+  // runtime. Only server code imports it; it never reaches the browser.
+  webpack(config) {
+    config.module.rules.push({ test: /\.md$/, type: 'asset/source' });
+    return config;
   },
 
-  // The deep-dive narrative pages moved from /work/[slug] to
-  // /projects/[slug]/narrative (now a tab inside the project space
-  // instead of a disconnected page). Old links — including ones already
-  // shared in job applications — keep working.
+  // The previous design lived at /projects/[slug]/(narrative|backlog|timeline),
+  // /docs/*, and /teams. Those links went out in job applications, so they
+  // land on the matching new page. (The old site's /work/[slug] → /projects
+  // redirect was served with max-age=0, so no browser holds it.)
   async redirects() {
     return [
-      {
-        source: '/work/:slug',
-        destination: '/projects/:slug/narrative',
-        permanent: true,
-      },
+      { source: '/projects/:slug/:tab*', destination: '/work/:slug', permanent: true },
+      { source: '/docs/:page*', destination: '/about', permanent: true },
+      { source: '/teams', destination: '/about', permanent: true },
     ];
   },
 };

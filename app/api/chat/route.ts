@@ -1,257 +1,172 @@
 /**
  * app/api/chat/route.ts
  *
- * Next.js API route that proxies chat to Gemini 2.5 Flash.
+ * Streaming chat for the AI version of Hamid (the hero AskOrb).
  *
- * Architecture:
- * - Receives messages array from client
- * - Builds system prompt with full resume + project context (no RAG vector store —
- *   Gemini's 1M context window easily handles ~10K tokens of resume content)
- * - Streams response back as Server-Sent Events
- * - Handles errors gracefully (rate limits, network, malformed requests)
+ *   POST { messages: { role: 'user' | 'model', text: string }[] }
+ *   → 200 text/plain stream of the reply
+ *   → 400 { error: 'invalid_request' } · 429 { error: 'rate_limited' }
+ *   → 503 { error: 'upstream_busy' }   · 502 { error: 'upstream_error' }
+ *   → 504 { error: 'upstream_timeout' }
  *
- * Environment variables required:
- *   GEMINI_API_KEY — get yours from https://aistudio.google.com/apikey
- *
- * Cost note: gemini-2.5-flash is FREE on Google AI Studio's free tier.
- * Rate limits: 10 requests/minute, 1M tokens/day, 1500 requests/day.
- * That's plenty for portfolio traffic.
+ * Order: rate limit → validate → open the model stream → pipe plain text.
+ * The key is read only here and never reaches the browser. Message contents
+ * are never logged; logs carry the model, the prompt path, and status codes.
  */
 
-import { NextRequest } from 'next/server';
+import { ApiError, GoogleGenAI, ThinkingLevel, type Content } from '@google/genai';
+import { buildSystemPrompt } from '@/lib/persona';
+import { rateLimit } from '@/lib/rate-limit';
 
-// ============================================
-// THE SYSTEM PROMPT — this is the whole game
-// ============================================
-// This is what shapes Gemini's responses. The richer the context,
-// the better the answers. Keep this in sync with your actual resume.
-const SYSTEM_PROMPT = `You are Hamid Rizvi answering questions about your work and background. You are NOT an AI assistant pretending to be Hamid — you ARE Hamid for the duration of this conversation.
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+// Upper bound for the whole function on Vercel; the model call itself is capped lower.
+export const maxDuration = 30;
 
-## Voice & Tone
-- Speak in first person ("I built...", "When I was at...", "My approach is...")
-- Be direct, punchy, confident — like you would in a job interview
-- Avoid corporate fluff and buzzwords. No "synergy," no "leverage," no "excited to share"
-- It's OK to be opinionated — you have strong product instincts and you stand by them
-- Keep responses tight: under 150 words unless the user asks for depth
-- Use line breaks for readability, but don't over-format with lists/headers
-- Never mention being an AI, language model, or chatbot
+// Measured: a model call once hung for 26s+ before failing, leaving the orb
+// "thinking". Cap the upstream call so the client falls back instead.
+const UPSTREAM_TIMEOUT_MS = 20_000;
 
-## What you know
-You're an AI Product Manager and engineer, a May 2026 graduate of NYU (M.S. Technology Management, GPA 3.75). You did your B.Tech in Computer Science (Cloud Computing) at SRM in Chennai.
-
-## Current work
-**LexTrack AI** — AI/ML Product Engineering Intern (Feb – May 2026). Building production RAG systems and TypeScript microservices with a 3-layer fallback architecture. Reduced LLM inference costs 40% with sub-2s p95 latency. Maintaining 99.5% uptime across 50+ active restaurant partners.
-
-Before this, you led the **LexTrack capstone** (Sep–Dec 2025) — architected a 0→1 restaurant reservation template inside a 1-click no-code platform. Hybrid AI architecture (deterministic rules + Gemini LLM) cut merchant onboarding from 30 min → 5 min (80% reduction). Drove 0→50+ active users in 8 weeks, 85% weekly retention, 4.2/5 CSAT. Led 3 engineers + 1 designer through full lifecycle, conducted 25+ user interviews, identified $2M+ TAM. Used RICE prioritization. 70% LLM cost reduction via prompt engineering, caching, and intelligent fallback.
-
-## Flagship projects
-
-**QuadTax** (Product Lead on a 3-person team, Apr 2026 → present) — AI tax filing for 1.5M international students (F-1/J-1 visa holders) in the US. You led product on a team of three: you scoped the opportunity, designed the hybrid architecture, built the deterministic tax engine and OCR intake pipeline, and ran the beta. As a team with no external boss you were your own stakeholders — you killed scope creep in standing reviews (state returns, amended filings, visa edge cases all argued for and cut), caught each other gold plating, and settled architecture arguments with prototypes rather than compromise. Hybrid execution engine: LLM agents handle reasoning (residency determination, treaty evaluation, OCR document parsing) while pure Python handles math (tax brackets, regulatory lookups). 100% mathematical accuracy because the deterministic zone never sees the LLM. Cut prep time from 35 min → <10 min in self-testing. OCR pipeline (Tesseract + pdfplumber) for W-2, 1042-S, I-94. Generates official IRS forms (1040-NR, 8843, 8833). Built FICA recovery module identifying illegal withholding under IRC § 3121(b)(19). Stack: Next.js, FastAPI, OpenAI Structured Outputs, Pydantic.
-
-**AI Purchase Analytics** (Personal project, Oct 2025) — Streamlit app processing 110K+ transactions, serving 96K+ customer profiles. RFM segmentation, cohort retention, ML-powered churn prediction (AUC 0.82, 15% retention targeting improvement). Gemini API generates strategic insights and revenue opportunities. Cut executive reporting time 95% (4 hours → 5 minutes). Stack: Python, Pandas, Gemini, Streamlit, Plotly.
-
-**Squirrel AI** (Product Lead on a 2-person team — you and a friend) — AI-powered repo analyzer. Pulls GitHub repos, extracts code structure across 11 languages (Python, JS, TS, Go, Java, C++, etc.), generates summaries, lets users ask context-aware questions with file references. Your biggest product argument: naive full-repo-in-context vs a structured extraction layer. You settled it with evidence — ran the naive version against a real 50K-line codebase and watched it collapse. Stack: React frontend, FastAPI backend, OpenAI embeddings.
-
-**Equiply Asset Intelligence** (Optimal Tier submission, Equiply hiring tournament) — the brief handed you a dirty hospital-equipment CSV (manufacturer, model, serial) and asked for two enriched fields: manufactured date and device type, with no external API provided. You shipped a 100% client-side data pipeline plus a full EAM dashboard: a heuristic extraction engine decodes dates embedded in proprietary serial formats across 50+ medical brands, a medical dictionary maps models to device categories, and a lifecycle engine flags each of 801 devices as Good/Warning/Critical (478 critical). Unreadable serials get confidence-scored at 30% and visually flagged for human audit instead of silently guessed — 52% parsed with high confidence. One-click export still produces the exact minimum-tier CSV. Stack: React (Vite), Tailwind, PapaParse, custom SVG charts, zero external APIs.
-
-**Claude Support Triage Agent** (Independent project, Jul 2026, solo build and audit — not affiliated with or endorsed by Anthropic, built entirely on Anthropic's public docs) — an agent that triages developer support tickets for a public API. Five tools including a live status-page check, RAG over ingested documentation, and a forced structured final output. A rules-based routing engine, not the model, makes the escalation call: billing, security, sales, and bug-report tickets always go to a human regardless of model confidence, everything else routes on a blended confidence threshold. After the core build shipped, you ran it through a 7-point external code review and verified every finding independently instead of trusting the write-up — in 3 of 7 areas the real problem was bigger than reported. Biggest catch: Row-Level Security was disabled on all six database tables plus an unintended full-privilege grant to unauthenticated roles, a live pre-launch security hole you found with Supabase's own advisor tooling and closed with two independent fixes. Also found a test-coverage gap that was actually a structural bug (the file was untestable, not just untested), deduped a threshold constant that was silently drifting across two files, and ran a real paid-vs-free model comparison instead of guessing: $0.25 across 40 tickets cut the incomplete-ticket rate from 50% to 7.5%. Fixed 12 verified bugs total. You also deliberately did NOT do a few things — declined to rewrite git history to look cleaner, and surfaced a disclosed-but-unflattering number as an explicit choice instead of quietly picking the best-looking framing. Stack: Next.js, TypeScript, Supabase with pgvector and Row-Level Security, OpenRouter.
-
-## Skills
-**AI/ML:** RAG systems, prompt engineering, Pydantic structured outputs, multi-agent orchestration, vector databases, model evaluation, cost optimization. LLMs: GPT-4, Claude, Gemini.
-**Product:** 0→1 development, user research, RICE prioritization, PRD writing, roadmapping, A/B testing, cohort analysis. CSPO and CSM certified.
-**Engineering:** Python, TypeScript, Next.js, React, Node.js, FastAPI, PostgreSQL, Docker, AWS, Azure, CI/CD.
-**Data:** SQL, Pandas, NumPy, OCR (Tesseract), ETL, churn modeling.
-
-## Your "thing"
-You prototype before you PRD. The reason: AI startups don't need more PMs who write specs. They need product people who can build the hard parts before writing the spec, so the spec is grounded in what's actually possible. You operate at the intersection of technical architecture and product strategy.
-
-## Other context
-- Based in NYC
-- Email: hamidrizvi@stern.nyu.edu
-- LinkedIn: linkedin.com/in/hamid-rizvi
-- GitHub: github.com/hamidrizvi4
-- Looking for full-time PM roles — graduated May 2026, available to start now
-- Interests outside work: photography, chess, doing two AI-driven case study interviews per day with Gemini for product sense practice
-
-## Boundaries
-- If asked something off-topic (politics, current events, generic AI advice not related to your work) → politely redirect: "I can only really speak to my own work — happy to dig into any project though"
-- If asked something you genuinely don't know about your own background → say so. Don't make things up. Suggest they email you for specifics.
-- If asked about salary expectations, visa status, or other sensitive topics → politely defer to direct conversation: "Happy to talk about that over email"
-- Never break character. You are Hamid.`;
-
-export const runtime = 'edge'; // Fast cold starts, lower latency
+const MAX_MESSAGES = 12;
+const MAX_USER_CHARS = 600;
+// Replies come back from the client too; cap them so history can't be used to stuff the context.
+const MAX_REPLY_CHARS = 4_000;
+// Chosen by measurement (Oct 2026, this key): first token in ~0.7s every run,
+// passes the persona probes (scope, salary, injection, unknown), and is the
+// most honest on unknowns. gemini-3.5-flash swung from 1s to 6s and once hung
+// 26s+; gemini-2.5-flash returns 404 for this key.
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 
 interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
+  role: 'user' | 'model';
+  text: string;
 }
 
-interface RequestBody {
-  messages: ChatMessage[];
+const json = (status: number, error: string) => Response.json({ error }, { status });
+
+function parseMessages(body: unknown): ChatMessage[] | null {
+  const messages = (body as { messages?: unknown } | null)?.messages;
+  if (!Array.isArray(messages) || messages.length === 0 || messages.length > MAX_MESSAGES) return null;
+  const valid = messages.every(
+    (m) =>
+      m &&
+      typeof m.text === 'string' &&
+      m.text.trim() !== '' &&
+      ((m.role === 'user' && m.text.length <= MAX_USER_CHARS) ||
+        (m.role === 'model' && m.text.length <= MAX_REPLY_CHARS)),
+  );
+  if (!valid || messages[0].role !== 'user' || messages[messages.length - 1].role !== 'user') return null;
+  return messages.map(({ role, text }: ChatMessage) => ({ role, text }));
 }
 
-export async function POST(req: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
+function clientIp(req: Request): string {
+  // On Vercel the first x-forwarded-for entry is the client address set by the platform.
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
+}
 
-  if (!apiKey) {
-    return new Response(
-      JSON.stringify({ error: 'GEMINI_API_KEY is not configured.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+// Models that rejected a system instruction once (some Gemma models do);
+// later requests go straight to the persona-as-first-turn path.
+const turnPersonaModels = new Set<string>();
+
+async function openStream(ai: GoogleGenAI, model: string, messages: ChatMessage[], signal: AbortSignal) {
+  const system = buildSystemPrompt({ firstReply: !messages.some((m) => m.role === 'model') });
+  const contents: Content[] = messages.map((m) => ({ role: m.role, parts: [{ text: m.text }] }));
+  const config = {
+    temperature: 0.6,
+    maxOutputTokens: 500,
+    abortSignal: signal,
+    // Gemini 3 models think by default, and thinking tokens count against the
+    // 500-token cap: measured, gemini-3.5-flash spent 477 on thinking and cut
+    // the answer off at 17 words. MINIMAL fixed that and cut time-to-first-token
+    // from 3.3s to 1.1s. Gemma doesn't take this setting.
+    ...(model.startsWith('gemini-') && { thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL } }),
+  };
+
+  if (!turnPersonaModels.has(model)) {
+    try {
+      const stream = await ai.models.generateContentStream({
+        model,
+        contents,
+        config: { ...config, systemInstruction: system },
+      });
+      console.info(`[chat] ${model}: system-instruction path`);
+      return stream;
+    } catch (err) {
+      if (!/system.?instruction|developer instruction/i.test((err as Error).message ?? '')) throw err;
+      turnPersonaModels.add(model);
+    }
   }
 
-  let body: RequestBody;
+  console.info(`[chat] ${model}: persona-as-first-turn path (model rejects system instructions)`);
+  return ai.models.generateContentStream({
+    model,
+    contents: [
+      { role: 'user', parts: [{ text: system }] },
+      { role: 'model', parts: [{ text: "Understood. I'll answer as the AI version of Hamid and follow those rules." }] },
+      ...contents,
+    ],
+    config,
+  });
+}
+
+export async function POST(req: Request) {
+  // Rate limit first, so malformed requests count too.
+  if (!rateLimit(clientIp(req))) return json(429, 'rate_limited');
+
+  let body: unknown;
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: 'Invalid request body.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+    return json(400, 'invalid_request');
   }
+  const messages = parseMessages(body);
+  if (!messages) return json(400, 'invalid_request');
 
-  if (!Array.isArray(body.messages) || body.messages.length === 0) {
-    return new Response(
-      JSON.stringify({ error: 'messages array is required.' }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+  // GEMINI_API_KEY is the name the live deployment already uses.
+  const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error('[chat] no API key configured (GOOGLE_AI_API_KEY)');
+    return json(500, 'not_configured');
   }
+  const model = process.env.GOOGLE_AI_MODEL || DEFAULT_MODEL;
+  const ai = new GoogleGenAI({ apiKey });
 
-  // ============================================
-  // BUILD GEMINI REQUEST
-  // ============================================
-  // Gemini API expects: { contents: [{ role: 'user' | 'model', parts: [{ text }] }] }
-  // We map our internal message format to Gemini's, and prepend the system prompt
-  // as the first user/model exchange (Gemini doesn't have a separate "system" role
-  // for the streamGenerateContent endpoint via REST).
-  const geminiContents = [
-    {
-      role: 'user',
-      parts: [{ text: SYSTEM_PROMPT }],
-    },
-    {
-      role: 'model',
-      parts: [{ text: 'Got it — I\'ll answer as Hamid. Ready when you are.' }],
-    },
-    ...body.messages.map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }],
-    })),
-  ];
+  // Abort upstream if the visitor leaves or the call runs past the cap.
+  const signal = AbortSignal.any([req.signal, AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)]);
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${apiKey}`;
-
-  let geminiResponse: Response;
+  let stream: AsyncGenerator<{ text?: string }>;
   try {
-    geminiResponse = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: geminiContents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 600,
-          topP: 0.95,
-        },
-        // Block harassment, hate speech, etc. — sensible defaults
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-        ],
-      }),
-    });
+    stream = await openStream(ai, model, messages, signal);
   } catch (err) {
-    console.error('Gemini fetch failed:', err);
-    return new Response(
-      JSON.stringify({ error: 'Could not reach Gemini.' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-
-  if (!geminiResponse.ok) {
-    const errorText = await geminiResponse.text();
-    console.error('Gemini error:', geminiResponse.status, errorText);
-    let errorDetail = 'Gemini returned an error.';
-    try {
-      const parsed = JSON.parse(errorText);
-      errorDetail = parsed?.error?.message || errorDetail;
-    } catch {
-      // Use generic message
+    if ((err as Error).name === 'TimeoutError') {
+      console.error(`[chat] ${model}: upstream timeout after ${UPSTREAM_TIMEOUT_MS}ms`);
+      return json(504, 'upstream_timeout');
     }
-    return new Response(
-      JSON.stringify({
-        error: geminiResponse.status === 429
-          ? 'Rate limited — try again in a moment.'
-          : errorDetail,
-      }),
-      { status: geminiResponse.status, headers: { 'Content-Type': 'application/json' } }
-    );
+    const status = err instanceof ApiError ? err.status : 0;
+    console.error(`[chat] ${model}: upstream error ${status || 'network'}`);
+    return status === 429 ? json(503, 'upstream_busy') : json(502, 'upstream_error');
   }
 
-  if (!geminiResponse.body) {
-    return new Response(
-      JSON.stringify({ error: 'No response stream.' }),
-      { status: 502, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-
-  // ============================================
-  // STREAM TO CLIENT
-  // ============================================
-  // Gemini SSE → our SSE format. We extract the text token from each Gemini chunk
-  // and forward it to the client as { text: "..." }.
   const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
-
-  const stream = new ReadableStream({
+  const body$ = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const reader = geminiResponse.body!.getReader();
-      let buffer = '';
-
       try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const data = line.slice(6).trim();
-            if (!data) continue;
-
-            try {
-              const parsed = JSON.parse(data);
-              const text =
-                parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-              if (text) {
-                const sseChunk = `data: ${JSON.stringify({ text })}\n\n`;
-                controller.enqueue(encoder.encode(sseChunk));
-              }
-            } catch {
-              // Malformed Gemini chunk — skip silently
-            }
-          }
+        for await (const chunk of stream) {
+          if (chunk.text) controller.enqueue(encoder.encode(chunk.text));
         }
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
         controller.close();
       } catch (err) {
-        console.error('Stream error:', err);
+        if (!req.signal.aborted) console.error(`[chat] ${model}: stream interrupted`);
         controller.error(err);
       }
     },
   });
 
-  return new Response(stream, {
+  return new Response(body$, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      Connection: 'keep-alive',
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
     },
   });
 }
