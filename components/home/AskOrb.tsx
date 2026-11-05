@@ -323,7 +323,7 @@ export default function AskOrb({ prompts }: { prompts: Prompt[] }) {
           onBlur={() => setFocused(false)}
           maxLength={MAX_CHARS}
           autoComplete="off"
-          placeholder="Ask me anything — my systems, my process, what broke"
+          placeholder="Ask me anything"
           className="min-w-0 flex-1 bg-transparent py-1.5 text-base text-beige placeholder:text-camel focus:outline-none"
         />
         {micSupported && (

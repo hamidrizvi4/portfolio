@@ -24,8 +24,8 @@ export default function ContactPage() {
         </p>
       </PageIntro>
 
-      <div className="container-site mt-16 grid gap-16 md:mt-24 md:grid-cols-12 md:gap-12">
-        <section aria-labelledby="direct-label" className="md:col-span-5">
+      <div className="container-site mt-16 grid gap-16 md:mt-24 lg:grid-cols-12 lg:gap-12">
+        <section aria-labelledby="direct-label" className="lg:col-span-5">
           <h2 id="direct-label" className="label">
             [ Direct ]
           </h2>
@@ -50,7 +50,7 @@ export default function ContactPage() {
           </ul>
         </section>
 
-        <section aria-labelledby="write-label" className="md:col-span-6 md:col-start-7">
+        <section aria-labelledby="write-label" className="lg:col-span-6 lg:col-start-7">
           <h2 id="write-label" className="label">
             [ Write to me ]
           </h2>

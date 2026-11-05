@@ -147,11 +147,11 @@ export default function OffDuty() {
           <dl className="mt-6 grid grid-cols-2 gap-6">
             <div>
               <dt className="label">Current</dt>
-              <dd className="mt-1 font-display text-6xl leading-none text-beige lining-nums">1272</dd>
+              <dd className="mt-1 font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-none text-beige lining-nums">1272</dd>
             </div>
             <div>
               <dt className="label">Peak</dt>
-              <dd className="mt-1 font-display text-6xl leading-none text-beige lining-nums">1314</dd>
+              <dd className="mt-1 font-display text-[clamp(2.5rem,5vw,3.75rem)] leading-none text-beige lining-nums">1314</dd>
             </div>
           </dl>
           <p className="mt-6 text-camel">On chess.com. I play the Sicilian, Najdorf Variation.</p>

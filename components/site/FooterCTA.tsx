@@ -105,7 +105,7 @@ export default function FooterCTA() {
 
       <p
         aria-hidden="true"
-        className="pointer-events-none -mb-[0.22em] select-none whitespace-nowrap text-center font-display text-[15.5vw] leading-[0.8] text-ink-3"
+        className="pointer-events-none -mb-[0.22em] select-none whitespace-nowrap text-center font-display text-[14vw] leading-[0.8] text-ink-3"
       >
         HAMID RIZVI
       </p>

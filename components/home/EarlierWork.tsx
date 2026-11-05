@@ -30,8 +30,8 @@ export default function EarlierWork({
                 </span>
                 <span className="mt-1 block text-sm text-camel md:hidden">{p.category}</span>
               </span>
-              <span className="hidden w-72 shrink-0 text-sm text-camel md:block">{p.category}</span>
-              <span className="label hidden w-28 shrink-0 md:block">[{p.year}]</span>
+              <span className="hidden w-52 shrink-0 text-sm text-camel md:block lg:w-72">{p.category}</span>
+              <span className="label hidden w-28 shrink-0 lg:block">[{p.year}]</span>
               <span className="shrink-0 text-sm text-beige">View →</span>
             </Link>
           </li>

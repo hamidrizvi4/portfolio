@@ -22,7 +22,6 @@ const config: Config = {
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       fontSize: {
-        hero: ['clamp(4rem, 13vw, 12rem)', { lineHeight: '0.9', letterSpacing: '-0.04em' }],
         section: ['clamp(2.5rem, 6vw, 5.5rem)', { lineHeight: '1', letterSpacing: '-0.02em' }],
         statement: ['clamp(1.75rem, 3.6vw, 3.25rem)', { lineHeight: '1.15' }],
         label: ['0.75rem', { lineHeight: '1.4', letterSpacing: '0.12em' }],

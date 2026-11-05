@@ -72,12 +72,12 @@ export default function Header() {
         transition={{ duration: 0.32, ease: EASE_OUT }}
         onFocusCapture={() => setHidden(false)}
       >
-        <div className="container-site grid h-[var(--header-h)] grid-cols-[1fr_auto] items-center md:grid-cols-[1fr_auto_1fr]">
+        <div className="container-site grid h-[var(--header-h)] grid-cols-[1fr_auto] items-center lg:grid-cols-[1fr_auto_1fr]">
           <Link href="/" className="label justify-self-start !text-beige" aria-label="Hamid Rizvi, home">
             Hamid Rizvi
           </Link>
 
-          <p className="label hidden md:block" aria-label={time ? `New York, ${time}` : 'New York'}>
+          <p className="label hidden lg:block" aria-label={time ? `New York, ${time}` : 'New York'}>
             New York, NY · <span className="tabular-nums">{time ?? '--:--'}</span>
           </p>
 
@@ -94,7 +94,7 @@ export default function Header() {
             ))}
             <Link
               href="/contact"
-              className="rounded-full border border-rule px-4 py-2 text-sm text-beige transition-colors duration-fast hover:border-beige hover:bg-beige hover:text-ink"
+              className="whitespace-nowrap rounded-full border border-rule px-4 py-2 text-sm text-beige transition-colors duration-fast hover:border-beige hover:bg-beige hover:text-ink"
             >
               Get in touch
             </Link>
