@@ -198,7 +198,7 @@ export const projects: Project[] = [
 
 export const byTier = (tier: Tier) => projects.filter((p) => p.tier === tier);
 
-/** "Up close" strip: each experience/featured project's detail shots, or two placeholders until it has some. */
+/** "Up close" strip: every experience/featured project's real detail shots, no placeholders. */
 export const galleryShots = projects
   .filter((p) => p.tier !== 'earlier')
-  .flatMap((p) => (p.details?.length ? p.details : [undefined, undefined]).map((shot) => ({ project: p, shot })));
+  .flatMap((p) => (p.details ?? []).map((shot) => ({ project: p, shot })));

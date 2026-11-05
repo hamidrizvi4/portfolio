@@ -33,12 +33,43 @@ export interface Checklist {
   items: string[];
 }
 
+export type Tone = 'rules' | 'model' | 'person';
+
+/** One box in an architecture diagram (components/work/ArchDiagram.tsx). */
+export interface ArchBox {
+  tone: Tone;
+  label: string;
+  /** Decision number the box links down to. */
+  decision?: number;
+  /** Large display line. */
+  title?: string;
+  text?: string;
+  note?: string;
+  chips?: string[];
+  /** Small uppercase line, e.g. a cost or a constraint. */
+  meta?: string;
+  list?: string[];
+  /** Dashed sub-box; what dashed means is the diagram's `inset` legend. */
+  inset?: { label: string; decision?: number; steps?: string[]; note: string };
+}
+
+export interface Arch {
+  /** Top to bottom. A pair forks into two lanes and joins on the next step. */
+  steps: (ArchBox | [ArchBox, ArchBox])[];
+  /** Legend name for the person tone: Manager, Filer, and so on. */
+  person: string;
+  /** Legend text for the dashed inset, when the diagram has one. */
+  inset?: string;
+  caption?: string;
+}
+
 export interface DeepDive {
   slug: string;
   subtitle: string;
   stack: string[];
   myRole: string[];
-  architectureDiagram?: string;
+  /** LexTrack renders its own bespoke diagram instead. */
+  architecture?: Arch;
   decisions: Decision[];
   /** Things that looked fine and were wrong: the "What broke" section. */
   lessons?: Lesson[];
@@ -134,27 +165,65 @@ export const deepDives: DeepDive[] = [
       'Two things set it apart. It turns messy paperwork into tracked obligations: a manager uploads a scanned lease or inspection report, the system proposes structured fields, and nothing becomes official until a person confirms it. And it tracks the obligations the city doesn\'t: when an inspection report implies a recurring deadline with no city database behind it, ResidenceOS puts it on the portfolio compliance view with the date computed and the working shown.',
       'The repository is private because this is a commercial product. The live demo runs on a synthetic portfolio with real Stripe in test mode. There are no paying customers yet.',
     ],
-    architectureDiagram: `\
-        MODEL              │        CODE AND PEOPLE
-                           │
-                           │  Upload (PDF / image)
-                           │    → validate (magic bytes, size)
-                           │    → normalize image to sRGB
-                           │    → store (building-scoped path)
-                           │
- vision model reads  ◀─────┤
- the page                  │
-   → fixed JSON schema     │
-     (no action fields) ───┼─▶ needs_review
-                           │    → human confirms
-                           │    → deterministic cycle table
-                           │      (TypeScript, versioned)
-                           │      computes the due date
-                           │    → compliance_obligation
-                           │      (source: extracted_from_document)
-                           │    → portfolio heatmap
-
- Everything the model touches ends at needs_review.`,
+    architecture: {
+      person: 'Manager',
+      inset: 'Hardened after it broke',
+      caption: 'Everything the model touches ends at needs_review. The due date never comes from the model or the document.',
+      steps: [
+        {
+          tone: 'person',
+          label: 'Manager · upload',
+          title: 'A scanned lease or inspection report.',
+          note: 'PDF or image. Every upload is untrusted input.',
+        },
+        {
+          tone: 'rules',
+          label: 'Intake',
+          list: [
+            'Typed by magic bytes only, size-capped',
+            'Stored under a generated, building-scoped path',
+            'The uploaded filename never touches a path',
+          ],
+          inset: {
+            label: 'Image normalization',
+            note: 'Every image is re-encoded to plain sRGB first. One provider silently returned empty fields for a wide-gamut PNG.',
+          },
+        },
+        {
+          tone: 'model',
+          label: 'Vision model',
+          decision: 3,
+          text: 'Reads the page and proposes values in a fixed JSON schema.',
+          chips: ['Proposed fields', 'Inspection date', 'Injection flag'],
+          meta: 'No schema field can express an action',
+          note: 'Document text arrives in one delimited block, never concatenated into instructions.',
+        },
+        {
+          tone: 'person',
+          label: 'needs_review',
+          decision: 1,
+          text: 'A person confirms or edits every proposed field.',
+          note: 'Nothing becomes official until someone has looked at it.',
+        },
+        {
+          tone: 'rules',
+          label: 'Cycle table · TypeScript, versioned',
+          decision: 2,
+          text: "Computes the legal due date from the building's community district, never from the document.",
+          list: [
+            "DOB's rotating cycle, December 31 deadline",
+            'No usable district fails closed: no date at all',
+            'Same inspection day, due dates up to three years apart',
+          ],
+        },
+        {
+          tone: 'person',
+          label: 'Portfolio compliance view',
+          title: 'compliance_obligation',
+          note: 'Source: extracted_from_document, linked back to the page with the derivation visible.',
+        },
+      ],
+    },
     decisions: [
       {
         title: 'The model reads and proposes. Code and people decide.',
@@ -279,15 +348,64 @@ export const deepDives: DeepDive[] = [
       'Solo build and solo audit. I designed the agent loop and the routing engine, built the ingestion pipeline against real documentation, and shipped the review queue and reporting dashboard on top.',
       'Once the core product was live, I ran the repo through a 7-point external code review and treated the findings the way I\'d want a senior engineer to treat feedback on my own code: verify everything independently against the live system before touching anything, and don\'t assume the review\'s scope was complete. In three of the seven areas, the actual problem was larger than what was reported.',
     ],
-    architectureDiagram: `\
-docs.claude.com ────┐
-support.claude.com ─┼──▶ ingestion: chunk + embed ──▶ Supabase / pgvector
-status.claude.com ──┘                                    RLS enabled, default-deny
-
-ticket ──▶ agent orchestrator: tool-calling loop ──▶ routing engine
-                     │                                     │
-                     ▼                                     ├──▶ auto-resolve
-              tool_calls: audit trail                      └──▶ human review queue`,
+    architecture: {
+      person: 'Reviewer',
+      inset: 'Fixed after the external review',
+      caption: 'Every tool call behind every routing decision is written to the tool_calls audit trail.',
+      steps: [
+        {
+          tone: 'rules',
+          label: 'Docs ingestion',
+          text: 'Real documentation, chunked and embedded into Supabase pgvector.',
+          chips: ['docs.claude.com', 'support.claude.com', 'status.claude.com'],
+          inset: {
+            label: 'RLS, two layers',
+            decision: 2,
+            steps: ['Revoked the unintended anon and authenticated grants', 'Enabled RLS default-deny on all six tables'],
+            note: "Verified by a second run of Supabase's advisor: ERROR and WARN both gone.",
+          },
+        },
+        {
+          tone: 'model',
+          label: 'Agent orchestrator',
+          text: 'A tool-calling loop over five tools, ending in a forced structured output.',
+          chips: ['Category', 'Draft reply', 'Retrieval score', 'Self-certainty'],
+          meta: 'Proposes. Does not decide.',
+        },
+        {
+          tone: 'rules',
+          label: 'Routing engine',
+          decision: 1,
+          text: 'Routes on stakes, not raw confidence.',
+          list: [
+            'Billing, security, sales, bug reports: always a human',
+            'Everything else: 0.6 × retrieval + 0.4 × self-certainty',
+            'Auto-resolve only at 0.80 or above',
+          ],
+        },
+        [
+          {
+            tone: 'rules',
+            label: 'Auto-resolve',
+            title: '15 of 40',
+            note: 'Resolved in the paid rerun, at $0.25 for the whole set.',
+          },
+          {
+            tone: 'person',
+            label: 'Human review queue',
+            title: '22 of 40',
+            note: 'Escalated with the reasoning trace and confidence breakdown. Reject, edit, or approve.',
+          },
+        ],
+        {
+          tone: 'person',
+          label: 'Reporting dashboard',
+          decision: 3,
+          text: 'Auto-resolve, escalation, and documentation-gap rates, plus confidence calibration.',
+          note: 'Incomplete runs cut from 50% on the free tier to 7.5% paid. Both rows stay published.',
+        },
+      ],
+    },
     decisions: [
       {
         title: 'The routing engine decides, not the model',
@@ -365,6 +483,61 @@ ticket ──▶ agent orchestrator: tool-calling loop ──▶ routing engine
       'Product lead on a three-person team. I scoped the zero-to-one opportunity, designed the hybrid architecture, built the deterministic tax engine and the OCR intake pipeline, and ran the beta. The calls documented below were mine to make and defend.',
       'A three-person team with no external boss means you are your own stakeholders, and we treated that seriously. We killed scope creep in standing reviews: state returns, amended filings, and a dozen visa edge cases all got argued for and cut. We caught each other gold plating more than once, polish on screens no beta user had asked for, and pulled the time back into intake. And when two credible approaches collided, deterministic rules versus letting the model reason about brackets being the biggest, we made the case to each other with prototypes and picked a side rather than splitting the difference.',
     ],
+    architecture: {
+      person: 'Filer',
+      caption: 'The line through the middle is the product: models read and reason, Python does every number.',
+      steps: [
+        {
+          tone: 'person',
+          label: 'Filer · upload',
+          title: 'Photograph your W-2.',
+          note: 'Replaces 35 minutes of copying numbers into form fields.',
+          chips: ['W-2', '1042-S', 'I-94'],
+        },
+        {
+          tone: 'model',
+          label: 'Intake agents',
+          decision: 2,
+          text: 'Tesseract and pdfplumber extract the page, OpenAI Structured Outputs fills Pydantic schemas.',
+          chips: ['Parse', 'Classify', 'Residency', 'Treaty eligibility'],
+          meta: 'Every field validates against a typed contract',
+        },
+        [
+          {
+            tone: 'rules',
+            label: 'Passes validation',
+            text: 'Flows straight into the return.',
+            note: '90% less manual data entry.',
+          },
+          {
+            tone: 'person',
+            label: 'Fails validation',
+            text: '"Please confirm this field."',
+            note: 'An OCR misread becomes a question, never a wrong number.',
+          },
+        ],
+        {
+          tone: 'rules',
+          label: 'Deterministic tax zone · Python',
+          decision: 1,
+          text: 'IRS rules written and tested by hand. The LLM cannot reach it.',
+          list: [
+            'Brackets and treaty thresholds',
+            'Unit-tested against IRS examples',
+            'FICA recovery under IRC § 3121(b)(19)',
+          ],
+          meta: '100% math accuracy by construction',
+        },
+        {
+          tone: 'person',
+          label: 'Filing package',
+          decision: 3,
+          title: '35 min → <10 min',
+          chips: ['1040-NR', '8843', '8833'],
+          note: 'Filing-ready PDFs. A 5-person beta drove two iteration cycles on intake.',
+        },
+      ],
+    },
     decisions: [
       {
         title: 'The math never touches the LLM',
@@ -431,6 +604,50 @@ ticket ──▶ agent orchestrator: tool-calling loop ──▶ routing engine
     myRole: [
       'Solo developer and product owner. I scoped the feature set, built the full stack (Python data pipeline, Gemini integration, Streamlit front end), and ran it against a real 110K+ transaction dataset to validate the output before treating any of the metrics as real.',
     ],
+    architecture: {
+      person: 'Exec',
+      caption: 'Gemini never generates a number. It explains the numbers Python generated.',
+      steps: [
+        {
+          tone: 'person',
+          label: 'Transaction export',
+          title: '110K+ transactions',
+          note: 'Replaces a 4-hour Excel ritual.',
+        },
+        {
+          tone: 'rules',
+          label: 'Pandas pipeline',
+          decision: 1,
+          text: 'Every calculation runs in Python.',
+          chips: ['RFM segmentation', 'Cohort retention', 'Revenue attribution'],
+          meta: '96K+ customer profiles in one run',
+        },
+        [
+          {
+            tone: 'rules',
+            label: 'Churn model · Scikit-learn',
+            decision: 3,
+            title: 'AUC 0.82',
+            note: 'On held-out test data. 15% better retention targeting than the rule-based baseline.',
+          },
+          {
+            tone: 'model',
+            label: 'Gemini',
+            decision: 1,
+            text: 'Receives only validated, structured output.',
+            note: 'Explains segments, weak cohorts, and churn risk in plain English.',
+            meta: 'Never sees raw data',
+          },
+        ],
+        {
+          tone: 'person',
+          label: 'Streamlit dashboard',
+          decision: 2,
+          title: '4 hr → 5 min',
+          note: 'Plotly charts with hover detail. Filter by segment, drill into a cohort.',
+        },
+      ],
+    },
     decisions: [
       {
         title: 'LLM interprets; Python computes',
@@ -497,6 +714,58 @@ ticket ──▶ agent orchestrator: tool-calling loop ──▶ routing engine
       'Product lead on a two-person team, a friend and me. I defined the scope, public GitHub repos first with private repos as the v2 target, built the extraction and Q&A pipeline, and ran it against real repositories to validate that the answers were actually useful, not just grammatically plausible.',
       'Two people is the smallest team that still forces real product arguments, and we had them. The biggest was extraction depth versus shipping speed: the naive full-repo approach was simpler and faster to ship, the structured extraction layer was more engineering with a payoff we could only argue for. We settled it the honest way, ran the naive version against a real 50K-line codebase, and watched it collapse. Disagreements ended with evidence, not with whoever talked longer.',
     ],
+    architecture: {
+      person: 'Developer',
+      inset: 'Cache',
+      caption: 'v0 concatenated the whole repo into the prompt. It collapsed on a real 50K-line codebase.',
+      steps: [
+        {
+          tone: 'person',
+          label: 'Developer · repo URL',
+          title: 'Any public GitHub repo.',
+          note: 'Private repos are the v2 target.',
+        },
+        {
+          tone: 'rules',
+          label: 'Structured extraction',
+          decision: 1,
+          text: 'Language-specific parsers, the same output regardless of syntax.',
+          chips: ['Functions and classes', 'Signatures and docstrings', 'Imports', 'Dependency graph'],
+          meta: '11 languages',
+        },
+        {
+          tone: 'rules',
+          label: 'Embedding index',
+          decision: 3,
+          text: 'Built on the extracted metadata, with source paths carried through.',
+          inset: {
+            label: 'In-memory, TTL',
+            steps: ['Key: repo URL + commit SHA', 'A new commit invalidates it'],
+            note: '20 to 40 seconds cold, under a second after.',
+          },
+        },
+        {
+          tone: 'model',
+          label: 'LLM answer',
+          decision: 2,
+          text: 'Answers from retrieved chunks, never the raw repo.',
+          meta: 'Citation format enforced in the prompt',
+        },
+        {
+          tone: 'rules',
+          label: 'Citation validator',
+          decision: 2,
+          text: 'Every cited path is checked against the repo before the answer returns.',
+          note: 'A path that does not exist is flagged, not returned as a confident answer.',
+        },
+        {
+          tone: 'person',
+          label: 'Answer with citations',
+          title: '0 hallucinated paths',
+          note: 'File paths and functions in every answer, so the developer jumps straight to the code.',
+        },
+      ],
+    },
     decisions: [
       {
         title: 'Extract structure; don\'t rely on the context window',
@@ -561,6 +830,52 @@ ticket ──▶ agent orchestrator: tool-calling loop ──▶ routing engine
     myRole: [
       'An Optimal Tier submission to Equiply\'s hiring tournament. We treated the deliberately underspecified brief as a product exercise rather than a data-cleaning task: decide what the end user of this data actually needs, build the smallest version of that, and still hand back the exact artifact the minimum tier required.',
     ],
+    architecture: {
+      person: 'Operations team',
+      inset: 'Minimum tier, protected',
+      caption: 'Runs entirely client-side: the equipment data never leaves the browser, and there are no external APIs.',
+      steps: [
+        {
+          tone: 'person',
+          label: 'Raw CSV',
+          title: '801 medical devices',
+          note: 'Parsed in the browser with PapaParse.',
+        },
+        {
+          tone: 'rules',
+          label: 'Heuristic extraction engine',
+          decision: 2,
+          text: 'Manufacture dates decoded from the serial numbers themselves.',
+          chips: ['Numeric year-month blocks', 'Prefix-block decoding', 'Medical dictionary, 50+ brands'],
+        },
+        [
+          {
+            tone: 'rules',
+            label: 'Parsed',
+            title: '52%',
+            note: 'High confidence. Every derived field traces back to a documented rule.',
+          },
+          {
+            tone: 'person',
+            label: 'Unreadable',
+            decision: 3,
+            title: '48%',
+            note: 'Placeholder date so nothing crashes, confidence dropped to 30%, flagged for human audit.',
+          },
+        ],
+        {
+          tone: 'person',
+          label: 'Asset intelligence dashboard',
+          decision: 1,
+          chips: ['Total assets', 'Data health', 'Critical replacements'],
+          meta: '478 units critical · 25+ device types',
+          inset: {
+            label: 'One-click export',
+            note: 'Strips all application metadata and produces exactly the clean CSV the brief asked for.',
+          },
+        },
+      ],
+    },
     decisions: [
       {
         title: 'Ship a product, not a CSV',

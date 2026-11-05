@@ -21,6 +21,7 @@ import PageIntro from '@/components/site/PageIntro';
 import ProjectVisual from '@/components/home/ProjectVisual';
 import SectionHeader from '@/components/home/SectionHeader';
 import LexTrackDiagram from '@/components/work/LexTrackDiagram';
+import ArchDiagram from '@/components/work/ArchDiagram';
 
 type Params = { params: { slug: string } };
 
@@ -50,7 +51,8 @@ const DECISION_PARTS: [Exclude<keyof Decision, 'title'>, string][] = [
   ['result', 'What happened'],
 ];
 
-const GALLERY = ['aspect-[4/5]', 'aspect-[9/16]', 'aspect-[4/5]'];
+// Gallery cells: portrait shots take the staggered 4:5 / 9:16 / 4:5 rhythm, landscape shots 4:3.
+const PORTRAIT = ['aspect-[4/5]', 'aspect-[9/16]', 'aspect-[4/5]'];
 
 // Long-form copy: one readable column, offset right on desktop.
 const PROSE = 'md:col-span-8 md:col-start-5';
@@ -65,8 +67,9 @@ export default function CaseStudyPage({ params }: Params) {
   const data = load(params.slug);
   if (!data) notFound();
   const { i, project, study, dive, next } = data;
-  // LexTrack has a real diagram; the others still render their ASCII one.
-  const Diagram = project.slug === 'lextrack' ? LexTrackDiagram : null;
+  // LexTrack's diagram is bespoke; the rest render from data.
+  const diagram =
+    project.slug === 'lextrack' ? <LexTrackDiagram /> : dive.architecture && <ArchDiagram arch={dive.architecture} />;
 
   const story = [
     {
@@ -82,30 +85,10 @@ export default function CaseStudyPage({ params }: Params) {
         </div>
       ),
     },
-    (Diagram || dive.architectureDiagram) && {
+    diagram && {
       id: 'architecture',
       label: 'Architecture',
-      body: Diagram ? (
-        <div className={`min-w-0 ${PROSE}`}>
-          <Diagram />
-        </div>
-      ) : (
-        <div className={`min-w-0 ${PROSE}`}>
-          <p className="label mb-3 md:hidden" aria-hidden="true">
-            Scroll sideways →
-          </p>
-          {/* Focusable so keyboard users can scroll it sideways on phones; the
-              decisions below describe the same system in prose. */}
-          <div
-            role="img"
-            aria-label={`${project.title} architecture diagram. The decisions below describe it in words.`}
-            tabIndex={0}
-            className="overflow-x-auto border border-rule bg-ink-2 p-5 md:p-8"
-          >
-            <pre className="w-max font-mono text-[0.7rem] leading-snug text-camel md:text-sm">{dive.architectureDiagram}</pre>
-          </div>
-        </div>
-      ),
+      body: <div className={`min-w-0 ${PROSE}`}>{diagram}</div>,
     },
     {
       id: 'decisions',
@@ -229,15 +212,15 @@ export default function CaseStudyPage({ params }: Params) {
         )}
       </PageIntro>
 
-      <ProjectVisual
-        title={project.title}
-        shot={project.hero}
-        tag="Hero"
-        variant={i}
-        sizes="100vw"
-        priority
-        className="mt-12 aspect-video w-full md:mt-16"
-      />
+      {project.hero && (
+        <ProjectVisual
+          title={project.title}
+          shot={project.hero}
+          sizes="100vw"
+          priority
+          className="mt-12 aspect-video w-full md:mt-16"
+        />
+      )}
 
       <section aria-labelledby="summary-label" className="container-site mt-section">
         <SectionHeader id="summary-label" label="[ Summary ]" />
@@ -287,45 +270,15 @@ export default function CaseStudyPage({ params }: Params) {
         </div>
       </section>
 
-      {project.details?.length ? (
-        <div className="container-site mt-section">
-          {/* Desktop: one row, each shot growing by its aspect ratio, so all share a height at their
-              natural shape (capped at 560px tall). Four or more would shrink past legible in one row,
-              so they go two across instead. Phones: stacked full width. */}
-          <div
-            className={`flex flex-col gap-3 md:gap-6 ${project.details.length > 3 ? 'md:grid md:grid-cols-2' : 'md:flex-row'}`}
-            style={
-              project.details.length > 3
-                ? undefined
-                : { maxWidth: project.details.reduce((sum, s) => sum + (s.ratio ?? 1), 0) * 560 }
-            }
-          >
-            {project.details.map((shot) => (
-              <div
-                key={shot.src}
-                style={{ '--r': shot.ratio ?? 1 } as React.CSSProperties}
-                className="md:flex-[var(--r)_1_0%]"
-              >
-                <ProjectVisual
-                  title={project.title}
-                  shot={shot}
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  className="aspect-[var(--r)] w-full"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
+      {!!project.details?.length && (
         <div className="container-site mt-section grid grid-cols-2 items-end gap-3 md:grid-cols-3 md:gap-6">
-          {GALLERY.map((aspect, n) => (
+          {project.details.map((shot, n) => (
             <ProjectVisual
-              key={n}
+              key={shot.src}
               title={project.title}
-              tag="Detail"
-              variant={i + n + 1}
+              shot={shot}
               sizes="(min-width: 768px) 30vw, 45vw"
-              className={`w-full ${aspect} ${n === 2 ? 'hidden md:block' : ''}`}
+              className={`w-full ${(shot.ratio ?? 1) < 1 ? PORTRAIT[n % 3] : 'aspect-[4/3]'} [&_img]:transition-transform [&_img]:duration-slow [&_img]:ease-out hover:[&_img]:scale-110`}
             />
           ))}
         </div>
