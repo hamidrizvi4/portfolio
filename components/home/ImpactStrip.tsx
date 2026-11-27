@@ -32,7 +32,7 @@ const METRICS: Metric[] = [
   { value: 99.5, decimals: 1, suffix: '%', label: 'Uptime across 50+ restaurant partners', source: 'LexTrack AI, internship' },
   { value: 40, suffix: '%', label: 'Inference cost cut, held under 2s p95', source: 'LexTrack AI, internship' },
   { value: 14, suffix: '/14', label: 'Extraction accuracy at about one ninth the cost', source: 'ResidenceOS' },
-  { value: 0.25, decimals: 2, prefix: '$', label: 'To cut incomplete tickets from 50% to 7.5%', source: 'Claude Support Triage Agent' },
+  { value: 5, suffix: '/5', label: 'Unsafe auto-answers caught by an independent checker model', source: 'Claude Support Triage Agent' },
   { value: 100, suffix: '%', label: 'Tax math accuracy, by construction', source: 'QuadTax' },
 ];
 

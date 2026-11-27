@@ -26,11 +26,11 @@ const PRINCIPLES = [
   },
   {
     title: 'Put a hard wall where a wrong answer is expensive.',
-    body: 'The model reads and proposes; code and people decide. QuadTax\'s LLM never touches the tax math. ResidenceOS\'s model never sets a legal due date: those come from a versioned TypeScript rule table, and its extraction schema has no field that can express an action, so a prompt injection has nowhere to write "compliant." The triage agent always escalates billing, security, and sales tickets to a human, regardless of how confident the model claims to be. Guardrails are permissions, not prompts.',
+    body: 'The model reads and proposes; code and people decide. QuadTax\'s LLM never touches the tax math. ResidenceOS\'s model never sets a legal due date: those come from a versioned TypeScript rule table, and its extraction schema has no field that can express an action, so a prompt injection has nowhere to write "compliant." The triage agent always escalates billing, security, and sales tickets to a human, however confident the model claims to be, and its second-opinion checker can only ever escalate, never approve. Guardrails are permissions, not prompts.',
   },
   {
     title: 'Measure it instead of assuming it.',
-    body: "Every model choice gets a number. ResidenceOS's cheaper extraction model matched the baseline 14/14 on fixtures at about one ninth of the cost. On the triage agent, $0.25 of paid inference across the same 40 tickets cut the incomplete rate from 50% to 7.5%, measured rather than guessed. At LexTrack, model evals across GPT-4, Claude, and Gemini cut inference cost 40% while holding sub-2s p95. And when a number is weaker, I say so: QuadTax's 35-to-10-minute filing time is self-tested, not user-tested yet.",
+    body: "Every model choice gets a number. ResidenceOS's cheaper extraction model matched the baseline 14/14 on fixtures at about one ninth of the cost. On the triage agent, I hand-labeled the tickets and scored every routing change on must-escalate recall with ticket-level intervals. That is why my own cosine-similarity fix got rejected, and why the independent checker ships with its cost printed beside it: recall from 93.1% to 100%, coverage from 26.7% to 7.5%. At LexTrack, model evals across GPT-4, Claude, and Gemini cut inference cost 40% while holding sub-2s p95. And when a number is weaker, I say so: QuadTax's 35-to-10-minute filing time is self-tested, not user-tested yet.",
   },
   {
     title: 'Ship to real conditions, then write down what broke.',

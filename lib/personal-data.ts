@@ -73,13 +73,14 @@ export const caseStudies: CaseStudy[] = [
   },
   {
     id: 'triage',
-    problem: 'Every API company faces the same support-ops problem. A large tier of repetitive, doc-answerable tickets sits next to a smaller tier of billing, security, and sales tickets where a wrong autonomous answer is expensive. Most teams give every ticket the same attention regardless of which tier it is in.',
-    build: 'An agent loop with five tools, grounded in real public developer documentation rather than a toy dataset. A rules-based routing engine, not the model itself, makes the final call: billing, security, sales, and bug-report tickets always escalate to a human regardless of model confidence, everything else routes on a blended confidence threshold. Every tool call is logged for a full audit trail, with a review queue, a ticket dashboard, and a doc-gap view that surfaces where the documentation itself is thin.',
+    problem: "Every API company's support queue has two tiers: a large one of repetitive, doc-answerable tickets, and a smaller one of billing disputes, security reports, sales, and bug reports where a bot's confident wrong answer is the expensive failure. The hard part isn't getting an agent to answer tickets. It's knowing which ones it must not answer, and proving it.",
+    build: "A tool-calling agent grounded in Anthropic's public docs (pgvector RAG, a live status-page check, mocked account and pricing lookups) that proposes a category, a cited draft, and two confidence signals. A deterministic router, not the model, makes the call. On top: a hand-labeled evaluation harness, an independent checker on a second model family that can only escalate, and a researcher → writer split where code verifies every citation. A review queue, a dashboard, and a public intro site with the full results sit over all of it.",
     impact: [
-      'Ran the shipped build through a 7-point external code review and worked it the way a senior engineer works one: verified every claim independently instead of trusting the write-up',
-      'Found and closed a live pre-launch security exposure: Row-Level Security disabled on all six tables, plus an unintended full-privilege grant to unauthenticated roles',
-      'Measured, not guessed, the free-to-paid model tradeoff: $0.25 across 40 tickets cut the incomplete rate from 50% to 7.5%',
-      'Fixed 12 verified bugs across the build, the audit, and the paid rerun, including a structural issue that made core logic untestable',
+      'Must-escalate recall from 93.1% to 100% with an independent checker, with 0 unsafe auto-resolves in 120 runs for $0.00005 more per ticket. The cost, coverage falling from 26.7% to 7.5%, is published beside it',
+      'Unsupported claims per reply cut from 11.67 to 2.15 by a researcher → writer split, graded by a third-family judge that was validated on planted fabrications first',
+      'Rejected my own proposed fix, cosine-similarity retrieval, when the labeled eval showed every estimate pointing the wrong way',
+      '6 of 6 prompt-injection probes escalated with either addition on, and 0 canary leaks',
+      '18 verified bugs fixed, including a live pre-launch RLS exposure and an upstream model retirement that silently broke search',
     ],
   },
   {

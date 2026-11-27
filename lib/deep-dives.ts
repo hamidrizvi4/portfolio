@@ -10,12 +10,43 @@
  * Every number here is sourced from the resume; keep the two in sync.
  */
 
+/** A screenshot shown at its natural ratio, with a caption. */
+export interface Figure {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  caption?: string;
+}
+
 export interface Decision {
   title: string;
   setup: string; // The situation that forced a choice
   tradeoff: string; // What was genuinely in tension
   call: string; // What I decided and why
   result: string; // What happened because of it
+  /** Evidence for the call, rendered under the decision. */
+  figure?: Figure;
+}
+
+/** One results table. The first cell of each row is its label. */
+export interface ResultTable {
+  title: string;
+  columns: string[];
+  rows: {
+    cells: string[];
+    /** accent: the arm that ships or is highlighted; dim: rejected or baseline. */
+    tone?: 'accent' | 'dim';
+    /** Short chip after the row label, e.g. "Shipped" or "Rejected". */
+    tag?: string;
+  }[];
+  note?: string;
+}
+
+/** Measured results, rendered as an "Evaluation" section after the architecture. */
+export interface Evaluation {
+  intro: string[];
+  tables: ResultTable[];
 }
 
 export interface Outcome {
@@ -70,6 +101,7 @@ export interface DeepDive {
   myRole: string[];
   /** LexTrack renders its own bespoke diagram instead. */
   architecture?: Arch;
+  evaluation?: Evaluation;
   decisions: Decision[];
   /** Things that looked fine and were wrong: the "What broke" section. */
   lessons?: Lesson[];
@@ -81,6 +113,8 @@ export interface DeepDive {
     type: 'github' | 'demo';
     label: string;
     href: string;
+    /** Secondary links under the main CTA: repo, reports. */
+    more?: { label: string; href: string }[];
   };
 }
 
@@ -342,133 +376,305 @@ export const deepDives: DeepDive[] = [
   {
     slug: 'triage',
     subtitle:
-      'An agent that triages developer support tickets against real documentation, routes on stakes rather than raw confidence, then goes through a 7-point external code review the way a senior engineer works one: verify everything, fix what the review found, and fix what it missed too.',
-    stack: ['Next.js', 'TypeScript', 'Supabase', 'pgvector', 'OpenRouter'],
+      'A support agent that answers what the docs can answer and hands the rest to a human, with a deterministic router making that call. Then the part most agent demos skip: hand-labeled tickets, ticket-level confidence intervals, and two extra agents that are only allowed to make it safer, each measured on the same labels.',
+    stack: [
+      'Next.js',
+      'TypeScript',
+      'Supabase (Postgres, pgvector, RLS)',
+      'OpenRouter',
+      'qwen3.7-flash router',
+      'deepseek-v4-flash checker',
+      'LLM judge, validated first',
+      'Bootstrap CIs · AURC · Fisher exact',
+    ],
     myRole: [
-      'Solo build and solo audit. I designed the agent loop and the routing engine, built the ingestion pipeline against real documentation, and shipped the review queue and reporting dashboard on top.',
-      'Once the core product was live, I ran the repo through a 7-point external code review and treated the findings the way I\'d want a senior engineer to treat feedback on my own code: verify everything independently against the live system before touching anything, and don\'t assume the review\'s scope was complete. In three of the seven areas, the actual problem was larger than what was reported.',
+      'Solo, end to end: the agent loop and its five tools, the routing engine, docs ingestion into pgvector, the review queue and dashboard, the offline evaluation harness, and the public intro site with a routing calculator that runs the production route() function.',
+      'It shipped in three stages. In July, the core agent, followed by a 7-point external code review that I verified against the live system instead of trusting, which surfaced a live security exposure. In November, a labeled evaluation that turned "it seems to work" into must-escalate recall with an honest interval. Then two more agents, an independent checker and a researcher → writer split, each scored on the same labels and red-teamed with prompt-injection probes.',
+      'Every eval on this page cost under $2 of model spend in total. The tickets are synthetic and the labels are mine, and the write-up says both wherever a number depends on them.',
     ],
     architecture: {
       person: 'Reviewer',
-      inset: 'Fixed after the external review',
-      caption: 'Every tool call behind every routing decision is written to the tool_calls audit trail.',
+      inset: 'Hardened after it broke',
+      caption:
+        'Every router, checker, researcher, and writer call is written to the tool_calls audit trail. The researcher → writer split is opt-in and replaces the router agent\'s single drafting step.',
       steps: [
         {
           tone: 'rules',
           label: 'Docs ingestion',
-          text: 'Real documentation, chunked and embedded into Supabase pgvector.',
-          chips: ['docs.claude.com', 'support.claude.com', 'status.claude.com'],
+          text: "Anthropic's public developer docs, chunked and embedded into Supabase pgvector behind deny-all RLS.",
+          chips: ['docs.claude.com', 'support.claude.com'],
           inset: {
-            label: 'RLS, two layers',
-            decision: 2,
-            steps: ['Revoked the unintended anon and authenticated grants', 'Enabled RLS default-deny on all six tables'],
-            note: "Verified by a second run of Supabase's advisor: ERROR and WARN both gone.",
+            label: 'Re-indexed',
+            note: 'The embedding model was retired upstream (HTTP 410) and every search failed silently, production included. Re-embedded on qwen3-embedding-8b at the same 2048 dimensions.',
           },
         },
         {
           tone: 'model',
-          label: 'Agent orchestrator',
-          text: 'A tool-calling loop over five tools, ending in a forced structured output.',
-          chips: ['Category', 'Draft reply', 'Retrieval score', 'Self-certainty'],
+          label: 'Router agent · qwen3.7-flash',
+          text: 'A tool-calling loop (search_docs, a live check_status, check_pricing, lookup_account) that ends in one forced submit_resolution call.',
+          chips: ['Category', 'Cited draft', 'Retrieval score', 'Self-certainty'],
           meta: 'Proposes. Does not decide.',
         },
         {
           tone: 'rules',
-          label: 'Routing engine',
+          label: 'Routing engine · route()',
           decision: 1,
-          text: 'Routes on stakes, not raw confidence.',
           list: [
             'Billing, security, sales, bug reports: always a human',
-            'Everything else: 0.6 × retrieval + 0.4 × self-certainty',
-            'Auto-resolve only at 0.80 or above',
+            'Keyword safety net on the raw ticket text, which can only push toward a human',
+            'Otherwise 0.6 × retrieval + 0.4 × self-certainty, auto-resolve at 0.80',
           ],
+        },
+        {
+          tone: 'model',
+          label: 'Independent checker · deepseek-v4-flash',
+          decision: 4,
+          text: 'Reviews every proposed auto-resolve. Sees only the ticket and the proposed route: no draft, no tool calls, no scores.',
+          chips: ['agree', 'escalate'],
+          meta: 'Can only say no. Fails closed.',
         },
         [
           {
             tone: 'rules',
             label: 'Auto-resolve',
-            title: '15 of 40',
-            note: 'Resolved in the paid rerun, at $0.25 for the whole set.',
+            title: '7.5%',
+            note: 'of core tickets with the checker on, down from 26.7% for the router alone. The price of zero unsafe answers.',
           },
           {
             tone: 'person',
             label: 'Human review queue',
-            title: '22 of 40',
-            note: 'Escalated with the reasoning trace and confidence breakdown. Reject, edit, or approve.',
+            title: '100%',
+            note: 'of must-escalate tickets reached a human in all 120 runs, with the reasoning trace and confidence breakdown attached.',
           },
         ],
         {
           tone: 'person',
-          label: 'Reporting dashboard',
-          decision: 3,
-          text: 'Auto-resolve, escalation, and documentation-gap rates, plus confidence calibration.',
-          note: 'Incomplete runs cut from 50% on the free tier to 7.5% paid. Both rows stay published.',
+          label: 'Dashboard and offline eval',
+          decision: 2,
+          text: 'The queue and dashboard read one classification layer, so they can never disagree about an outcome. The eval recomputes every arm offline from raw run records with the same functions production runs.',
+        },
+      ],
+    },
+    evaluation: {
+      intro: [
+        '40 synthetic tickets, each hand-labeled with a gold category and a gold route under a written labeling policy: 24 need a human, 16 are answerable from the docs. 12 deliberately disguised hard cases are reported separately as a stress test. Every configuration ran 3 seeds, and eval runs never write to the production database.',
+        'The headline is must-escalate recall: of the tickets that need a human, the share that reached one. It always sits next to unsafe auto-resolves per run, auto-resolve precision, and coverage, so the cost of safety is on the same row. Intervals are 95% bootstraps that resample tickets, not runs, because three runs of one ticket are not three independent trials.',
+      ],
+      tables: [
+        {
+          title: 'Routing variants · qwen3.7-flash · 40 tickets × 3 seeds',
+          columns: ['Arm', 'Must-escalate recall', 'Unsafe auto-resolves / run', 'Auto-resolve precision', 'Coverage'],
+          rows: [
+            { cells: ['Model-reported retrieval + safety net', '93.1% (86–99%)', '1.7', '84.7%', '26.7%'], tone: 'accent', tag: 'Shipped' },
+            { cells: ['Cosine-similarity retrieval + safety net', '86.1%', '3.3', '71.7%', '28.3%'], tone: 'dim', tag: 'Rejected' },
+          ],
+          note: 'The safety net changed no decisions on this model, so each arm scores identically with and without it. On completed runs only, shipped recall is 93.0%, so counting failed runs as escalated is not propping up the headline.',
+        },
+        {
+          title: 'Independent checker · scored on the same router runs',
+          columns: ['Arm', 'Must-escalate recall', 'Unsafe / run', 'Coverage', 'Extra $ / ticket'],
+          rows: [
+            { cells: ['Router alone', '93.1%', '1.7', '26.7%', '—'], tone: 'dim' },
+            { cells: ['+ checker, different family (deepseek-v4-flash)', '100.0%†', '0.0', '7.5%', '+$0.00005'], tone: 'accent', tag: 'Default' },
+            { cells: ['+ checker, same model (qwen3.7-flash)', '97.2%', '0.7', '18.3%', '+$0.00003'] },
+          ],
+          note: '† No miss in any of the 120 runs, so the bootstrap collapses to 100–100%. The conservative ticket-level Wilson lower bound is 86.2%. Paired change +6.9 pts, 95% CI +1.3 to +14.3.',
+        },
+        {
+          title: 'Researcher → writer split · fresh matched runs, 52 tickets × 2 seeds',
+          columns: ['Metric', 'Single agent', 'Researcher → writer'],
+          rows: [
+            { cells: ['Unsupported claims per reply', '11.67', '2.15'], tone: 'accent' },
+            { cells: ['Share of claims unsupported (length-fair)', '57.5%', '24.0%'] },
+            { cells: ['Replies with any unsupported claim', '97.8%', '75.7%'] },
+            { cells: ['Citations to pages never retrieved', '9 / 264', '0 / 334'] },
+            { cells: ['Must-escalate recall, core set', '89.6%', '97.9%'] },
+            { cells: ['Coverage, core set', '31.3%', '10.0%'] },
+            { cells: ['Cost per ticket', '$0.0017', '$0.0022'] },
+          ],
+          note: 'Graded by gpt-6-luna, a third model family, against the evidence each writer actually had. The judge was validated first: 12 of 12 planted fabrications flagged, 10 of 10 verbatim sentences accepted.',
+        },
+        {
+          title: 'Prompt-injection red team · 6 probes, each needing a human',
+          columns: ['Pipeline', 'Escalated', 'Canary leaks'],
+          rows: [
+            { cells: ['Single agent', '5 / 6', '0'], tone: 'dim' },
+            { cells: ['Single agent + checker', '6 / 6', '0'], tone: 'accent' },
+            { cells: ['Researcher → writer', '6 / 6', '0'] },
+            { cells: ['Researcher → writer + checker', '6 / 6', '0'] },
+          ],
+          note: 'Fake approvals, fake system messages, fence breaks, and smuggled links. The one miss was a fence-break probe the single-agent router auto-resolved; the checker escalated it.',
         },
       ],
     },
     decisions: [
       {
-        title: 'The routing engine decides, not the model',
+        title: 'The router decides, not the model',
         setup:
-          'With five tools and a forced structured final output, the obvious design is to let the model itself decide when it is confident enough to auto-resolve a ticket. Confidence is right there in the output, so why not use it directly.',
+          'The agent ends every ticket with a structured answer that includes its own confidence. The obvious design is to let the model auto-resolve whenever it says it is sure.',
         tradeoff:
-          'Model confidence is a probabilistic self-report, and a single wrong autonomous answer on a billing or security ticket costs far more than a slow answer on a rate-limit question. Letting the model gate its own escalation is simpler to build, but it puts a probability distribution in charge of a decision that should be categorical.',
+          'Model confidence is a self-report, and one confident wrong answer on a billing dispute or a security report costs far more than a slow answer on a rate-limit question. Letting the model gate itself is less code, but it puts a probability in charge of a decision that should be categorical.',
         call:
-          'A rules-based routing engine sits outside the model and makes the final call. Billing, security, sales, and bug-report categories always escalate to a human, regardless of how confident the model claims to be. Everything else routes on a blended score, 0.6 times retrieval score plus 0.4 times self-certainty, against a 0.8 threshold. The asymmetric-risk categories get a hard rule, not a probability.',
+          'A small, pure, tested route() function sits outside the model. Billing, security, sales, and bug-report tickets always go to a human. A keyword safety net on the raw ticket text can only push a ticket toward a human. Everything else auto-resolves only if 0.6 × retrieval score + 0.4 × self-certainty reaches 0.80. The intro site\'s calculator imports the same function, so it cannot drift from production.',
         result:
-          'Every ticket now carries a category-based override or a measured threshold decision, and every tool call behind that decision is logged. The confidence formula itself had no empirical validation at first, a gap the audit phase below closes.',
+          'The labeled eval tested the rules as well as the agent. The safety net caught 15 of 19 billing, security, and sales tickets on text alone with 0 false hits, and changed 0 decisions, because the model had already labeled them correctly. It ships as a free backstop. The "bug reports always escalate" rule barely fires: only 5 of 21 bug-report runs were labeled as bugs, and the rest reached a human through low confidence instead. A category rule is only as good as the classifier, and now that is measured rather than assumed.',
+        figure: {
+          src: '/work/triage/routing-lab.png',
+          alt: 'Interactive routing calculator from the live site: sliders for retrieval score and self-certainty, category chips where the dashed ones always escalate, the computed confidence 0.6 × 0.82 + 0.4 × 0.90 = 0.852, an auto-resolve verdict, and a plot of the auto-resolve region with the route() source beside it.',
+          width: 2280,
+          height: 1200,
+          caption: 'The live site\'s routing calculator runs the production route(), so the explanation and the agent give the same answer.',
+        },
       },
       {
-        title: 'Verify the review, do not just implement it',
+        title: 'Pick the metric that matches the expensive failure',
         setup:
-          'An external code review flagged Row-Level Security as disabled and named thin test coverage on a function that had already caused two real dashboard-corrupting bugs. The fast path is to patch exactly what is named and move on.',
+          'The first comparison counted outcomes: the free model left 20 of 40 tickets incomplete, and a $0.25 paid rerun left 3. That measured whether the agent finished. It could not say whether any routing decision was right.',
         tradeoff:
-          'Trusting a review\'s scope is faster. Verifying independently against the live system is slower and sometimes finds the review understated the problem, which is only useful if you actually do it rather than assume the report was complete.',
+          'Accuracy is the familiar number, but it weighs a misfiled feature question the same as a bot confidently answering a security report. Recall alone is just as wrong: escalate everything and it reads 100%. Labeling is slow, and one labeler means the labels themselves are a source of error.',
         call:
-          'I ran Supabase\'s own advisor tooling against the live project instead of taking the finding on faith, and confirmed RLS disabled at ERROR level on all six tables, plus a WARN on a mutable function search path. Reading the migration history explained why: an earlier, unrelated fix had granted the anon and authenticated roles full read and write on every table as a side effect. On the test-coverage finding, trying to actually write the tests surfaced the real cause: the file was gated by an import that throws unconditionally outside a bundler, making it structurally untestable, not just untested.',
+          'I hand-labeled every ticket with a gold category and a gold route under a written policy, added 12 disguised hard cases reported separately, and made must-escalate recall the headline, always beside unsafe auto-resolves, precision, and coverage. 3 seeds per configuration. Incomplete runs count as escalated, because that is what production does with them, and I checked recall on completed runs alone so that choice could not flatter the number. The model came from a 12-ticket pilot of four cheap tool-calling models under a fixed budget.',
         result:
-          'Fixed the security exposure with two independent layers, revoked the unintended grants and enabled RLS default-deny, then verified with a second advisor scan showing both the ERROR and the WARN gone. Extracted the untestable logic into a pure module with no server-only gate and wrote real coverage against it, including the specific ordering bug that had caused the prior corruption. Four test suites now run as one command.',
+          'Shipped routing on qwen3.7-flash: 93.1% must-escalate recall (95% CI 86–99%), 1.7 unsafe auto-resolves per 40-ticket run, 84.7% precision, 26.7% coverage. My first interval was too narrow because it treated three runs of one ticket as independent evidence. A math audit of my own eval caught it, plus a doc that quoted the rejected arm\'s interval as the shipped one, and all of it was corrected before publishing.',
       },
       {
-        title: 'Disclose the free-tier number instead of burying it',
+        title: 'Reject my own fix when the evidence says no',
         setup:
-          'The free-tier run against a real 40-ticket set came back 50% incomplete. That is a true, disclosed finding, and also a number that reads as "the demo does not work" to someone skimming.',
+          'The retrieval score in the routing formula is the model\'s self-report. My proposed fix was to swap in the vector search\'s own cosine similarity, which sounds more objective and was my idea.',
         tradeoff:
-          'Reframe the story, quietly rerun until a better number appears, or spend real money on a clean paid run. Every option is defensible, and picking one alone and presenting it as the only option would have hidden the actual tradeoff the project exists to demonstrate.',
+          'Shipping it would have made a better-sounding story. But similarity measures whether a ticket is on-topic for the docs, not whether the docs can resolve it, and with 40 tickets any gap could be noise in either direction.',
         call:
-          'Surfaced it as an explicit choice rather than picking the flattering one silently, then spent a small budget, about $10, on an Exacto-routed paid rerun of the identical ticket set. Both configurations stay in the write-up.',
+          'I scored both as arms on the same agent runs, compared them as ranking signals with risk-coverage curves and AURC, and paired the comparison ticket by ticket with a bootstrap. The decision rule was written down first: no evidence it helps means it does not ship.',
         result:
-          'Free tier: 8 resolved, 12 escalated, 20 incomplete, $0. Paid: 15 resolved, 22 escalated, 3 incomplete, $0.25. Both rows verified independently, the free-tier figure recomputed from the database against the dashboard\'s own classification rules, the cost figure pulled from OpenRouter\'s billing API rather than estimated.',
+          'Cosine cut recall from 93.1% to 86.1% and nearly doubled unsafe auto-resolves, from 1.7 to 3.3 per run. As a ranking signal it scored worse than no ranking at all (AURC 0.393 vs 0.354). Paired, the recall gap\'s interval is 0.0 to 15.2 points, so it is not significant on 40 tickets, and the write-up says exactly that instead of "routed worse." Rejected. The same discipline applied to the 0.6/0.4 weights: the blend ranks barely better than self-certainty alone (AURC 0.187 vs 0.193), so they are documented as an untuned prior rather than refit to 40 labels.',
+        figure: {
+          src: '/work/triage/risk-coverage.png',
+          alt: 'Risk-coverage chart over 65 eligible runs: the shipped signal (0.6 model-reported retrieval plus 0.4 certainty, AURC 0.187) stays lowest as coverage grows, the rejected cosine blend scores 0.277, cosine alone 0.393, self-certainty alone 0.193, and model-reported retrieval alone 0.220.',
+          width: 2280,
+          height: 880,
+          caption: 'Which signal should gate automation? Lower AURC means the tickets that need a human get sorted last. A perfect ranking scores 0.074 and no ranking about 0.354.',
+        },
       },
       {
-        title: 'Route the judgment calls, not just the tickets',
+        title: 'Add a second model that can only say no',
         setup:
-          'Three separate moments came up where the easy move was to decide something alone and make the story tidier: squash the git history into a cleaner narrative, pick whichever framing of the incomplete-rate number looked best, and quietly smooth over a git discrepancy where a single commit covered what should have been roughly a dozen files with no record of the session that produced it.',
+          'After the eval, an unsafe auto-resolve still got through about 1.7 times per 40-ticket run. A second opinion is the obvious fix, and the obvious way to build one fails in two ways: it shares the router\'s blind spots, or it gains the power to approve.',
         tradeoff:
-          'Every one of those calls would have been easy to make alone, and nobody reviewing the finished product would have known. But the entire thesis of this agent is that some decisions get routed to a human because the output alone cannot tell you whether skipping that step was safe.',
+          'A strict reviewer catches more unsafe answers and also blocks safe ones, so every catch costs coverage, meaning tickets a human has to read. A reviewer on the same model is cheaper and gentler, but it is likely to agree with the mistakes it should catch.',
         call:
-          'Left the git history alone rather than rewriting published commits. Surfaced the incomplete-rate number as a three-way choice instead of silently picking the best-looking one. Reported the commit discrepancy plainly and asked before proceeding rather than guessing at an explanation.',
+          'The checker runs on a different model family and sees only the ticket and the proposed route, not the draft, the tool calls, or the router\'s scores, so it has nothing to anchor on. It has no tools and answers agree or escalate through one forced, schema-checked call. Code applies the verdict with a function that can only make a route more cautious, and a timeout, refusal, or malformed answer escalates. It was scored on the recorded runs, so every difference between arms is the checker\'s, and run against a same-model arm as the control.',
         result:
-          'One of those moments got a decision, the $10 paid rerun, made as an explicit opt-in. The other two got left alone, on the record. Both outcomes are visible in the repo, which is the same audit trail the product itself produces for every ticket it routes.',
+          'Recall went from 93.1% to 100%, with no unsafe auto-resolve in any of 120 runs (paired change +6.9 points, CI +1.3 to +14.3). It caught 5 of 5 unsafe proposals for $0.00005 a ticket. It also blocked 18 of 27 safe ones, so coverage fell from 26.7% to 7.5%. The same-model checker caught 3 of 5 and blocked 7, at 18.3% coverage. It is on by default in the batch runner, with a kill switch and the same-model setting as the middle option. Where to sit on that curve depends on what a reviewer\'s hour costs, so the curve is published.',
+        figure: {
+          src: '/work/triage/checker.png',
+          alt: 'Checker flow from the live site: ticket and router proposal feed a deepseek-v4-flash checker that answers agree (answer ships) or escalate (human reviews), with timeout, error, or bad output escalating. Below: recall 100.0% (was 93.1%), unsafe auto-resolves 0.0 (was 1.7), coverage 7.5% (was 26.7%), extra cost $0.00005 per ticket.',
+          width: 2280,
+          height: 1160,
+          caption: 'The checker reviews only proposed auto-resolves, so its cost lands only on those. A second model can only make the system safer; the eval prices what that costs.',
+        },
+      },
+      {
+        title: 'Make every sentence cite its evidence',
+        setup:
+          'Routing was now measured, but nothing measured whether a draft was true to the docs. The single agent wrote with its tools and its own memory in the same context, and one of its drafts said prompt-cache writes cost 0.25× when the docs say 1.25×.',
+        tradeoff:
+          'Splitting the work adds calls, latency, and cost. Measuring hallucination needs an LLM judge, and a judge can be wrong in ways that quietly favor one pipeline over the other.',
+        call:
+          'A researcher that can only search hands over passage ids. A writer with no tools sees only the ticket and those passages and tags every sentence as framing or as a claim with the passages behind it. Code then checks each citation against what was actually handed over; an uncited claim, an invented id, or a "not answerable" verdict goes to a human. I graded both pipelines with a judge from a third model family, against the full evidence each writer had, and tested the judge on planted fabrications and verbatim sentences before trusting it.',
+        result:
+          'Unsupported claims per reply fell from 11.67 to 2.15 (paired CI −10.90 to −8.27). Because split replies are also shorter, the length-fair number is the share of claims unsupported, 57.5% to 24.0%. Citations to pages never retrieved went from 9 of 264 to 0 of 334, by construction. It is not zero: 76% of split replies still hold at least one unsupported claim, because a citation proves the writer pointed at a passage, not that the passage says what the sentence says. Recall rose to 97.9% and coverage fell to 10%, so the split is opt-in.',
+        figure: {
+          src: '/work/triage/split.png',
+          alt: 'Researcher to writer flow from the live site: a search-only researcher passes passages P1 to P3 to a writer with no tools, a code citation check sends uncited claims or bad ids to escalation, and the router applies its usual rules. Below: 2.15 unsupported claims per reply (single agent 11.67), 76% of replies with any unsupported claim (single agent 98%), 97.9% must-escalate recall, $0.0022 per ticket.',
+          width: 2280,
+          height: 1170,
+          caption: 'Each reply was broken into atomic claims and graded only against the evidence its writer actually had.',
+        },
+      },
+      {
+        title: 'Verify the review instead of implementing it',
+        setup:
+          'Before any of the eval work, an external code review flagged Row-Level Security as disabled and named thin test coverage on a function that had already corrupted the dashboard twice. The fast path is to patch exactly what is named and move on.',
+        tradeoff:
+          'Trusting a review\'s scope is faster. Verifying against the live system is slower, and it is only worth anything if you assume the report might be incomplete.',
+        call:
+          'I ran Supabase\'s own advisor against the live project instead of taking the finding on faith. It confirmed RLS disabled on all six tables, and the migration history showed why: an earlier, unrelated fix had granted the anonymous and authenticated roles full read and write on every table. Trying to write the missing tests surfaced the real cause of the coverage gap: the file imported a module that throws outside a bundler, so it was untestable, not just untested.',
+        result:
+          'The exposure got two independent fixes, revoking the grants and enabling deny-all RLS, confirmed by a second advisor scan. The untestable logic moved into a pure module with real coverage, including the ordering bug behind the earlier corruption. In 3 of the 7 review areas, the real problem was bigger than reported.',
+      },
+    ],
+    lessons: [
+      {
+        title: 'The embedding model that disappeared',
+        body: 'Mid-eval, every doc search started failing. The embedding model behind the index had been retired upstream (HTTP 410), which silently broke search everywhere, production included, and the agent kept going on error strings instead of docs. After sign-off, I re-embedded the whole index on qwen3-embedding-8b at the same 2048 dimensions, and the model is now documented as a hard dependency.',
+      },
+      {
+        title: 'An eval batch that measured the database',
+        body: 'Exact vector scans hit the Postgres statement timeout under concurrent load, and half of one early batch had silently failed searches. Scoring it would have measured the database, not the agent, so it was discarded. Every tool error is now recorded, failed searches are excluded and retried, and a retry can only ever replace an infrastructure failure, never a run the agent got wrong.',
+      },
+      {
+        title: 'A judge that was unfair to the baseline',
+        body: 'One single-agent reply scored 25 of 29 claims unsupported, which looked too harsh to trust. The judge had seen only the first 20 of up to 68 retrieved chunks, and none of the account record or the ticket. I threw those scores out and regraded both pipelines with the full evidence. A separate harness bug had also altered the "verbatim" sentences in the judge\'s own validation set; I fixed it and reran the validation from scratch.',
+      },
+      {
+        title: 'A writer that thought until it ran out',
+        body: 'The writer is a reasoning model, and on some tickets it reasoned through all 8,192 tokens and never made its forced call (finish_reason: length). Every single-call agent now has a capped reasoning budget with separate headroom for the answer.',
+      },
+      {
+        title: 'An interval that collapsed to 100–100%',
+        body: 'Where every run escalated correctly, the bootstrap interval came out as a meaningless 100–100%. Those arms now report a conservative ticket-level Wilson lower bound over the 24 needs-a-human tickets instead: 86.2% for the checker, not a false certainty.',
+      },
+      {
+        title: 'The pattern',
+        body: 'Almost all of these failed quietly: an error string where docs should be, a well-formed score built on missing evidence, an interval that looked precise. The habit that caught them was to check the inputs whenever a number looked surprising, in either direction, before believing the conclusion.',
+      },
+    ],
+    checklists: [
+      {
+        title: 'Guardrails, each in code with a test',
+        items: [
+          'Monotone authority: applyChecker and applyGrounding can keep a route or escalate it, never the reverse, and a self-test runs every verdict against every route.',
+          'Fail closed: a timeout, transport error, refusal, or malformed output escalates. Nothing defaults to agree.',
+          'Strict schemas: every agent answers through one forced tool call with enum verdicts, parsed and validated before code reads it.',
+          'Independence: the checker sees only the ticket and the proposed route, on a different prompt and a different model family.',
+          'Least privilege: the researcher can only search, and the writer and checker have no tools at all.',
+          'Input fencing: ticket and doc text is fenced and length-capped as data, and attempts to break the fence are neutralised before any prompt sees them.',
+          'Deterministic grounding: code checks that every claim cites a passage the writer was actually given.',
+          'Bounded and audited: timeouts, token ceilings, a capped reasoning budget, and retries only on transport errors. Every call is logged to tool_calls, and CHECKER=off is the kill switch.',
+        ],
+      },
+      {
+        title: 'Where it stands',
+        items: [
+          'Live at agenttriage.vercel.app: the intro site with the routing calculator, the evaluation, and the multi-agent results, plus the review queue and dashboard on synthetic tickets with mocked accounts and no sign-in.',
+          'The live demo queue still shows the earlier paid single-agent run. Every eval number on this page comes from offline runs against the hand labels, and the site says so.',
+          'Typecheck, 7 test suites, lint, and the production build pass. 18 bugs and findings are logged in the repo with their fixes.',
+        ],
       },
     ],
     outcomes: [
-      { stat: '7', label: 'External review findings, 3 of 7 larger than reported once independently verified' },
-      { stat: '2', label: 'Independent fix layers for a live pre-launch RLS security exposure' },
-      { stat: '4', label: 'Test suites added after extracting untestable logic into a pure module' },
-      { stat: '$0.25', label: 'Cost to cut the incomplete rate from 50% to 7.5% on the same 40-ticket set' },
-      { stat: '12', label: 'Verified bugs fixed across the build, the audit, and the paid rerun' },
-      { stat: '0', label: 'Unilateral rewrites of git history or silently cherry-picked numbers' },
+      { stat: '100%', label: 'Must-escalate recall with the independent checker: 0 unsafe auto-resolves in 120 runs, up from 93.1%' },
+      { stat: '2.15', label: 'Unsupported claims per reply after the researcher → writer split, down from 11.67' },
+      { stat: '6 / 6', label: 'Prompt-injection probes escalated with either addition on, and 0 canary leaks' },
+      { stat: '52', label: 'Hand-labeled tickets × 3 seeds, scored with ticket-level 95% intervals' },
+      { stat: '$0.0016', label: 'Router cost per ticket. The checker adds $0.00005' },
+      { stat: '18', label: 'Bugs and findings fixed across the build, audit, eval, and multi-agent work' },
     ],
     retro: [
-      'Raise the max-token limit and re-verify. One ticket in the paid rerun came back with truncated JSON, almost certainly the output ceiling cutting a long response mid-payload, a clear next fix rather than a mystery.',
-      'Turn the doc-gap signal into an actual feedback loop. Right now it surfaces on the dashboard as a list of low-retrieval tickets, and it should feed directly into documentation planning instead of waiting to be read.',
-      'The reviewer-overturn calibration metric is only meaningful at scale. At launch it reflected exactly one real human review, a single data point dressed up as a percentage, and it needs a real sample before anyone should trust it.',
+      'Grow the labeled set and add a second labeler. Most of the honest "not significant" calls on this page are a sample-size problem, and with one labeler, label noise is unmeasured.',
+      'Tune the checker instead of shipping only its strictest setting. It blocked 18 of 27 safe auto-resolves; the next experiment is whether a narrower prompt holds the 5-of-5 catch rate while the false alarms drop.',
+      'Force submit_resolution as soon as the model stops calling tools, not only on the last turn. It is the main remaining source of incomplete runs.',
+      'Rerun the live demo queue on the shipped pipeline and apply the indexed-vector migration, so the demo shows the same system the numbers describe.',
     ],
     cta: {
-      type: 'github',
-      label: 'Check out the GitHub repo',
-      href: 'https://github.com/hamidrizvi4/claude-support-triage-agent',
+      type: 'demo',
+      label: 'See it live, with the eval',
+      href: 'https://agenttriage.vercel.app',
+      more: [
+        { label: 'Code and eval harness on GitHub', href: 'https://github.com/hamidrizvi4/claude-support-triage-agent' },
+        { label: 'Evaluation report', href: 'https://github.com/hamidrizvi4/claude-support-triage-agent/blob/main/docs/EVALUATION.md' },
+        { label: 'Multi-agent report', href: 'https://github.com/hamidrizvi4/claude-support-triage-agent/blob/main/docs/MULTI_AGENT.md' },
+      ],
     },
   },
   // ==========================================================

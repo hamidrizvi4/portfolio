@@ -112,19 +112,24 @@ export const projects: Project[] = [
     slug: 'triage',
     title: 'Claude Support Triage Agent',
     year: '2026',
-    role: 'Solo build and audit',
-    category: 'Agent that routes on stakes',
+    role: 'Solo build, evaluation, and audit',
+    category: 'Multi-agent triage, scored against hand labels',
     tier: 'featured',
-    note: "Independent portfolio project, not affiliated with or endorsed by Anthropic. Built entirely on Anthropic's public developer documentation.",
+    note: "Independent portfolio project, not affiliated with or endorsed by Anthropic. Built entirely on Anthropic's public developer documentation. Tickets are synthetic and the labels are mine.",
     hero: {
       src: '/work/triage/hero.png',
-      alt: 'Triage agent reporting dashboard: auto-resolve rate, escalation rate, documentation-gap rate, average time to draft, confidence calibration, and an escalation breakdown.',
+      alt: 'The triage agent\'s live intro site: "Resolves what the docs answer. Routes what they can\'t." Beside it, a run-triage card shows ticket 07 of 40 calling search_docs, check_status, and submit_resolution, scoring 0.87 confidence against the 0.8 threshold, and auto-resolving, decided by route(), not the model.',
     },
     preview: {
       src: '/work/triage/preview.png',
-      alt: 'Triage agent metrics across 40 decided runs, with escalations broken down by category and reason, and a list of documentation gaps.',
+      alt: 'One triaged ticket: three tool calls, a confidence of 0.87 against the 0.8 auto-resolve threshold, and an auto-resolved verdict decided by route(), not the model.',
     },
     details: [
+      {
+        src: '/work/triage/dashboard.png',
+        alt: 'Triage agent reporting dashboard: auto-resolve rate, escalation rate, documentation-gap rate, average time to draft, confidence calibration, and an escalation breakdown.',
+        ratio: 2560 / 1600,
+      },
       {
         src: '/work/triage/queue.png',
         alt: 'Triage agent review queue: each ticket with its category, routing reason, confidence, and age.',

@@ -22,6 +22,8 @@ import ProjectVisual from '@/components/home/ProjectVisual';
 import SectionHeader from '@/components/home/SectionHeader';
 import LexTrackDiagram from '@/components/work/LexTrackDiagram';
 import ArchDiagram from '@/components/work/ArchDiagram';
+import Figure from '@/components/work/Figure';
+import ResultsTable from '@/components/work/ResultsTable';
 
 type Params = { params: { slug: string } };
 
@@ -44,7 +46,7 @@ export function generateMetadata({ params }: Params): Metadata {
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const DECISION_PARTS: [Exclude<keyof Decision, 'title'>, string][] = [
+const DECISION_PARTS: [Exclude<keyof Decision, 'title' | 'figure'>, string][] = [
   ['setup', 'The situation'],
   ['tradeoff', 'The tradeoff'],
   ['call', 'The call'],
@@ -90,6 +92,24 @@ export default function CaseStudyPage({ params }: Params) {
       label: 'Architecture',
       body: <div className={`min-w-0 ${PROSE}`}>{diagram}</div>,
     },
+    dive.evaluation && {
+      id: 'evaluation',
+      label: 'Evaluation',
+      body: (
+        <div className={`flex min-w-0 flex-col gap-14 ${PROSE}`}>
+          <div className="flex flex-col gap-5">
+            {dive.evaluation.intro.map((p) => (
+              <p key={p} className="max-w-[68ch] text-lg leading-relaxed text-beige/90">
+                {p}
+              </p>
+            ))}
+          </div>
+          {dive.evaluation.tables.map((t) => (
+            <ResultsTable key={t.title} table={t} />
+          ))}
+        </div>
+      ),
+    },
     {
       id: 'decisions',
       label: `Decisions (${pad(dive.decisions.length)})`,
@@ -116,6 +136,7 @@ export default function CaseStudyPage({ params }: Params) {
                   </div>
                 ))}
               </dl>
+              {d.figure && <Figure fig={d.figure} className="min-w-0 md:col-span-8 md:col-start-5 md:mt-10" />}
             </li>
           ))}
         </ol>
@@ -306,7 +327,24 @@ export default function CaseStudyPage({ params }: Params) {
             <span aria-hidden="true">↗</span>
             <span className="sr-only">(opens in a new tab)</span>
           </a>
-        ) : (
+        ) : null}
+        {!!dive.cta?.more?.length && (
+          <ul className="mt-8 flex flex-col gap-x-8 gap-y-3 sm:flex-row sm:flex-wrap">
+            {dive.cta.more.map((l) => (
+              <li key={l.href}>
+                <a
+                  href={l.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="label text-camel underline-offset-4 transition-colors duration-fast hover:text-beige hover:underline"
+                >
+                  {l.label} ↗<span className="sr-only"> (opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        {dive.cta ? null : (
           <p className="label mt-8">Demo coming soon</p>
         )}
       </section>

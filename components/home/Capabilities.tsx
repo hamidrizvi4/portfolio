@@ -19,7 +19,7 @@ const CAPABILITIES = [
   },
   {
     name: 'Production AI systems',
-    body: 'RAG, tool-using agents, and document extraction, with fallbacks so a model outage never blocks the user.',
+    body: 'RAG, tool-using and multi-agent systems, and document extraction, built so a model failure lands on a safe default, never on the user.',
     proof: { label: 'Claude Support Triage Agent', href: '/work/triage' },
   },
   {
