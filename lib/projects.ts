@@ -126,6 +126,16 @@ export const projects: Project[] = [
     },
     details: [
       {
+        src: '/work/triage/hero.png',
+        alt: 'The triage agent\'s intro page: "Resolves what the docs answer. Routes what they can\'t." Beside it, a run-triage card scores one ticket at 0.87 confidence against the 0.8 threshold and auto-resolves it, decided by route(), not the model.',
+        ratio: 2880 / 1620,
+      },
+      {
+        src: '/work/triage/evaluation.png',
+        alt: 'Evaluation section of the triage agent\'s site, "Scored against hand labels, including what didn\'t work": must-escalate recall 93.1% (95% CI 86–99%), 1.7 unsafe auto-resolves per run, 84.7% auto-resolve precision, and 26.7% coverage on 40 hand-labeled tickets × 3 seeds.',
+        ratio: 2280 / 1260,
+      },
+      {
         src: '/work/triage/dashboard.png',
         alt: 'Triage agent reporting dashboard: auto-resolve rate, escalation rate, documentation-gap rate, average time to draft, confidence calibration, and an escalation breakdown.',
         ratio: 2560 / 1600,
