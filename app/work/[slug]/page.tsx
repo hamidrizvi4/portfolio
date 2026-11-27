@@ -53,7 +53,9 @@ const DECISION_PARTS: [Exclude<keyof Decision, 'title' | 'figure'>, string][] = 
   ['result', 'What happened'],
 ];
 
-// Gallery cells: portrait shots take the staggered 4:5 / 9:16 / 4:5 rhythm, landscape shots 4:3.
+// Gallery cells: an all-portrait set (phone shots) takes the staggered 4:5 / 9:16 / 4:5 rhythm.
+// Any set with a landscape shot uses one 16:10 cell for every shot, so a mixed grid stays even,
+// cropped from the top-left so left-aligned headings and app chrome stay in frame.
 const PORTRAIT = ['aspect-[4/5]', 'aspect-[9/16]', 'aspect-[4/5]'];
 
 // Long-form copy: one readable column, offset right on desktop.
@@ -293,13 +295,13 @@ export default function CaseStudyPage({ params }: Params) {
 
       {!!project.details?.length && (
         <div className="container-site mt-section grid grid-cols-2 items-end gap-3 md:grid-cols-3 md:gap-6">
-          {project.details.map((shot, n) => (
+          {project.details.map((shot, n, all) => (
             <ProjectVisual
               key={shot.src}
               title={project.title}
               shot={shot}
               sizes="(min-width: 768px) 30vw, 45vw"
-              className={`w-full ${(shot.ratio ?? 1) < 1 ? PORTRAIT[n % 3] : 'aspect-[4/3]'} [&_img]:transition-transform [&_img]:duration-slow [&_img]:ease-out hover:[&_img]:scale-110`}
+              className={`w-full ${all.every((s) => (s.ratio ?? 1) < 1) ? PORTRAIT[n % 3] : 'aspect-[16/10] [&_img]:object-left-top'} [&_img]:transition-transform [&_img]:duration-slow [&_img]:ease-out hover:[&_img]:scale-110`}
             />
           ))}
         </div>
