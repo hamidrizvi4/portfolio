@@ -20,6 +20,8 @@ export interface Shot {
   alt: string;
   /** Width / height. Detail shots keep their natural shape in galleries. */
   ratio?: number;
+  /** false: case study only, left out of the home "Up close" strip. */
+  upClose?: boolean;
 }
 
 export interface Project {
@@ -144,11 +146,13 @@ export const projects: Project[] = [
         src: '/work/triage/queue.png',
         alt: 'Triage agent review queue: each ticket with its category, routing reason, confidence, and age.',
         ratio: 2928 / 1736,
+        upClose: false,
       },
       {
         src: '/work/triage/drawer.png',
         alt: 'One ticket in the triage agent: the original ticket, the reasoning trace of tool calls, the confidence breakdown against the 0.80 auto-resolve threshold, and reject, edit, and approve controls.',
         ratio: 959 / 1597,
+        upClose: false,
       },
     ],
   },
@@ -213,7 +217,10 @@ export const projects: Project[] = [
 
 export const byTier = (tier: Tier) => projects.filter((p) => p.tier === tier);
 
-/** "Up close" strip: every experience/featured project's real detail shots, no placeholders. */
-export const galleryShots = projects
-  .filter((p) => p.tier !== 'earlier')
-  .flatMap((p) => (p.details ?? []).map((shot) => ({ project: p, shot })));
+/** "Up close" strip: real detail shots only, no placeholders, in this project order. */
+const UP_CLOSE_ORDER = ['triage', 'residenceos', 'quadtax', 'lextrack'];
+
+export const galleryShots = UP_CLOSE_ORDER.flatMap((slug) => {
+  const p = projects.find((x) => x.slug === slug)!;
+  return (p.details ?? []).filter((shot) => shot.upClose !== false).map((shot) => ({ project: p, shot }));
+});
